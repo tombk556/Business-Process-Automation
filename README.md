@@ -1,6 +1,8 @@
 # BPA Beleg SS24
 
-
+# Aufgabe c
+- Nehmen was in MQTT5 vorhanden ist 
+- Folgende Konzepte besonders wichtig: Request Reply, Correlation, broker (lokalen Broker von der HTW nehmen), Return adress
 
 ## Getting started
 
