@@ -1,5 +1,5 @@
 from opcua import Client
-from config import settings
+from BPA_Webserver.config import settings
 import time
 
 
