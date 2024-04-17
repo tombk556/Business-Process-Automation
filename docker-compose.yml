@@ -11,12 +11,4 @@ services:
       - 8081:8081
     volumes:
       - ./aas.properties:/application/application.properties
-#      - ./<MY-AASX-FILE>:/application/aas/aas.aasx
-  aas2:
-    image: 'eclipsebasyx/aas-environment:2.0.0-milestone-02'
-    container_name: 'aas2'
-    ports:
-      - 8081:8081
-    volumes:
-      - ./aas.properties:/application/application.properties
-#      - ./<MY-AASX-FILE>:/application/aas/aas.aasx
+      - ./AASx7.aasx:/application/aas/AASx7.aasx
