@@ -1,7 +1,5 @@
 from opcua import Client
-from BPA_Webserver.config import settings
 import time
-from opcua.common.subscription import Subscription
 
 
 def opcua_server():
