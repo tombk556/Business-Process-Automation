@@ -1,10 +1,11 @@
 from opcua import Client
 from BPA_Webserver.config import settings
 import time
+from opcua.common.subscription import Subscription
 
 
 def opcua_server():
-    url = settings.url
+    url = "opc.tcp://uademo.prosysopc.com:53530/OPCUA/SimulationServer"
     client = Client(url)
     return client
 
