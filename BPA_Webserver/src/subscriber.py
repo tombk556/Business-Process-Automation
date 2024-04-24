@@ -1,47 +1,50 @@
 from opcua import Client, ua
 
-class SubHandler(object):
-    """
-    Subscription Handler class to handle data changes from the OPC-UA server.
-    """
-    def __init__(self, client):
-        self.client = client
-        self.last_value = False  # Initialize with the value being False
+class OPCUASubscriber:
+    def __init__(self, server_url, node_id):
+        self.server_url = server_url
+        self.node_id = node_id
+        self.client = Client(self.server_url)
+        self.last_value = False
 
-    def datachange_notification(self, node, val, data):
-        print(f"Data change detected. Node: {node}, New Value: {val}")
-        if not self.last_value and val:  # Checks if the last value was False and the new value is True
-            print("Value changed from False to True!")
-        self.last_value = val  # Update last_value with the new value
+    class SubHandler(object):
+        def __init__(self, outer_instance):
+            self.outer = outer_instance
 
-def main():
-    # Connect to the OPC UA server
-    client = Client("opc.tcp://uademo.prosysopc.com:53530/OPCUA/SimulationServer")  # Replace the URL with your server URL
-    try:
-        client.connect()
-        print("Client connected")
+        def datachange_notification(self, node, val):
+            print(f"Data change detected. Node: {node}, New Value: {val}")
+            if not self.outer.last_value and val:
+                print("Value changed from False to True!")
+            self.outer.last_value = val
 
-        # Create a subscription and pass the client to the handler
-        sub = client.create_subscription(100, SubHandler(client))
+    def connect(self):
+        self.client.connect()
+        print("Client connected to server.")
 
-        # Subscribe to data changes for a specific Boolean node
-        node = client.get_node("ns=6;s=MySwitch")  # Replace with your actual NodeId
+    def subscribe_to_changes(self):
+        handler = self.SubHandler(self)
+        sub = self.client.create_subscription(100, handler)
+        node = self.client.get_node(self.node_id)
         sub.subscribe_data_change(node)
+        print(f"Subscribed to node: {node}. Listening for changes...")
 
-        print("Subscribed to data changes for node:", node)
-
-        # Let the subscription run for a while
+    def run(self):
         try:
-            print("Subscription running... Press Ctrl+C to exit")
+            self.connect()
+            self.subscribe_to_changes()
             while True:
                 pass
         except KeyboardInterrupt:
             print("Received interrupt signal, stopping subscription")
+        finally:
+            self.disconnect()
 
-    finally:
-        # Disconnect the client
-        client.disconnect()
+    def disconnect(self):
+        self.client.disconnect()
         print("Client disconnected")
 
 if __name__ == "__main__":
-    main()
+    server_url = "opc.tcp://uademo.prosysopc.com:53530/OPCUA/SimulationServer"
+    node_id = "ns=6;s=MySwitch" 
+    subscriber = OPCUASubscriber(server_url, node_id)
+    subscriber.run()
