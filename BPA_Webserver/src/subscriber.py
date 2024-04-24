@@ -12,9 +12,10 @@ class OPCUASubscriber:
             self.outer = outer_instance
 
         def datachange_notification(self, node, val, data):
-            print(f"Data change detected. Node: {node}, New Value: {val}")
             if not self.outer.last_value and val:
-                print("Value changed from False to True!")
+                print("Neues Auto im Prüfstand!")
+            else:
+                print("Kein Auto, bzw. das Auto hat den Prüfstand verlassen!")
             self.outer.last_value = val
 
     def connect(self):
