@@ -17,12 +17,9 @@ test_thread = threading.Thread(target=subscriber.run)
 def index():
     return "Hallo, Flask läuft!"
  
-# Die Funktion zum Starten der Flask-App und des Threads
 def start_app():
-    # Thread starten
     test_thread.start()
-    # Flask-Server starten
-    app.run(debug=True, use_reloader=False)  # use_reloader=False ist wichtig, um Konflikte mit dem Thread zu vermeiden
+    app.run(debug=True, use_reloader=False)
  
 if __name__ == '__main__':
     start_app()
