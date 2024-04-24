@@ -11,7 +11,7 @@ class OPCUASubscriber:
         def __init__(self, outer_instance):
             self.outer = outer_instance
 
-        def datachange_notification(self, node, val):
+        def datachange_notification(self, node, val, data):
             print(f"Data change detected. Node: {node}, New Value: {val}")
             if not self.outer.last_value and val:
                 print("Value changed from False to True!")
