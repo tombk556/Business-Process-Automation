@@ -1,3 +1,6 @@
+# 0. RFID Chip auslesen
+- Text oder idShort der Shell/Items/Auto bekommen (für 1.)
+
 # 1. Registry ansprechen
 
 http://141.56.180.118:8080/shell-descriptors
@@ -24,3 +27,12 @@ http://141.56.180.118:8081/submodels/aHR0cHM6Ly9leGFtcGxlLmNvbS9pZHMvc20vODU1NF8
 
 
 http://141.56.180.118:8081/submodels/<submodelIdentifier>/submodel-elements/<path>/attachment
+
+
+# 3.
+- ...
+
+
+# 4. Upload 
+
+/submodels/{submodelIdentifier}/submodel-elements/{idShortPath}/attachment
