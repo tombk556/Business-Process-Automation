@@ -29,7 +29,7 @@ http://141.56.180.118:8081/submodels/aHR0cHM6Ly9leGFtcGxlLmNvbS9pZHMvc20vODU1NF8
 http://141.56.180.118:8081/submodels/<submodelIdentifier>/submodel-elements/<path>/attachment
 
 
-# 3.
+# 3. Prüfung
 - ...
 
 
