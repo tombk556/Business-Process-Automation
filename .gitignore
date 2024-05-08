@@ -3,6 +3,7 @@
 /.env
 /Data
 /fueenv
+/Models
 **/.env/
 **/venv/
 **/env/
