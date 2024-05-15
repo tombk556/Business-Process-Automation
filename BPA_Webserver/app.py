@@ -1,6 +1,8 @@
 from flask import Flask, jsonify
 import threading
-from utils import opcua_subscriber, latest_auto_id
+import sys
+sys.path.append('..')
+from src.utils import opcua_subscriber, latest_auto_id
 
 app = Flask(__name__)
 
