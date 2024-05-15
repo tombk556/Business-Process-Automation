@@ -9,7 +9,7 @@ client = mqtt.Client("Smartphone")
 client.connect(mqttBroker)
 
 client.loop_start()
-client.subscribe("TEMPERATURE")
+client.subscribe("AUTO_ID")
 client.on_message = on_message
 time.sleep(30)
 client.loop_end()
