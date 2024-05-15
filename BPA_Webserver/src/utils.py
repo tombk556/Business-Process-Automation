@@ -1,13 +1,14 @@
 from opcua import Client
 import requests
 import time
+import sys
+sys.path.append('../')
+from config import settings
 
-# OPC UA server endpoint URL
-opcua_url = "opc.tcp://localhost:4840"
+
+opcua_url = settings.opcua_url
+trigger_url = settings.aas_url
 latest_auto_id = None
-
-# URL of the endpoint to trigger with the Auto ID
-trigger_url = "http://141.56.180.118:8080/shell-descriptors"  # Replace with the actual URL
 
 class SubHandler(object):
     def datachange_notification(self, node, val, data):
