@@ -1,28 +1,22 @@
-from flask import Flask
+from flask import Flask, jsonify
 import threading
-import time
-import sys
-
-sys.path.append('../')
-from src.subscriber import OPCUASubscriber
+from utils import opcua_subscriber
 
 app = Flask(__name__)
 
-subscriber = OPCUASubscriber(server_url="opc.tcp://uademo.prosysopc.com:53530/OPCUA/SimulationServer",
-                             node_id="ns=6;s=MySwitch")
+latest_auto_id = None
 
-opcua_thread = threading.Thread(target=subscriber.run)
-
-
-@app.route('/')
-def index():
-    return "Hallo, Flask läuft!"
-
-
-def start_app():
-    opcua_thread.start()
-    app.run(debug=True, use_reloader=False)
-
+@app.route('/latest_auto_id', methods=['GET'])
+def get_latest_auto_id():
+    global latest_auto_id
+    if latest_auto_id is not None:
+        return jsonify({"auto_id": latest_auto_id})
+    else:
+        return jsonify({"message": "No Auto ID received yet"}), 404
 
 if __name__ == '__main__':
-    start_app()
+    subscriber_thread = threading.Thread(target=opcua_subscriber)
+    subscriber_thread.daemon = True
+    subscriber_thread.start()
+
+    app.run(host='0.0.0.0', port=8000)
