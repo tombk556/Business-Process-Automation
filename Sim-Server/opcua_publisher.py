@@ -3,13 +3,10 @@ import random
 import time
 import uuid
 
-bmws = ["BMW X7",
-        "BMW M4",
-        "BMW 5er Coupe",
-        "BMW 3er Limousine",
-        "BMW 1er Limousine",
-        "BMW 7er Limousine",
-        "BMW X5"]
+bmws = ["BMX_x7",
+        "bmw_m4",
+        "bmw_5er_coupe",
+        ]
 
 server = Server()
 url = "opc.tcp://0.0.0.0:4840" # replace with actual IP address of the OPCUA server 
@@ -26,7 +23,7 @@ auto_id.set_writable()
 
 def rfid_sim_reader():
     while True:
-        new_auto_id = str(uuid.uuid4()) + " " + random.choice(bmws)
+        new_auto_id = random.choice(bmws)
         auto_id.set_value(new_auto_id)
         print(new_auto_id + " published to OPC UA server")
         time.sleep(10)

@@ -21,7 +21,11 @@ def trigger_action_based_on_auto_id(auto_id):
     try:
         response = requests.get(trigger_url, params={'auto_id': auto_id})
         if response.status_code == 200:
-            print(f"Successfully triggered action for Auto ID: {auto_id}")
+            href = search_id_short_and_href(response.json(), auto_id)
+            if href:
+                print(href)
+            else: 
+                print(f"Failed to find href for Auto ID: {auto_id}")
         else:
             print(f"Failed to trigger action for Auto ID: {auto_id}, status code: {response.status_code}")
     except Exception as e:
@@ -55,3 +59,22 @@ def opcua_subscriber():
     finally:
         client.disconnect()
         print("Disconnected from OPC UA server")
+
+def search_id_short_and_href(data: dict, target_id_short: str) -> str:
+    if isinstance(data, dict):
+        if data.get("idShort") == target_id_short:
+            endpoints = data.get("endpoints")
+            if endpoints:
+                href = endpoints[0].get("protocolInformation", {}).get("href")
+                return data["idShort"], href
+        for key, value in data.items():
+            if isinstance(value, (dict, list)):
+                result = search_id_short_and_href(value, target_id_short)
+                if result:
+                    return result
+    elif isinstance(data, list):
+        for item in data:
+            result = search_id_short_and_href(item, target_id_short)
+            if result:
+                return result
+    return None
