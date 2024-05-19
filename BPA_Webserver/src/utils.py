@@ -2,20 +2,17 @@ from config import settings
 from opcua import Client
 import requests
 import time
-import sys
 import threading
 import logging
-
-logging.basicConfig(level=logging.INFO, format='%(levelname)s:: %(message)s')
+import sys
+sys.path.append('../')
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
-sys.path.append('../')
+OPCU_URL = settings.opcua_url
+AAS_URL = settings.aas_url
+ID = "idShort"  # ID to search for in AAS Shell
 
-# Retrieve settings
-opcua_url = settings.opcua_url
-trigger_url = settings.aas_url
-
-# Global variable to store the latest auto ID
 latest_auto_id_lock = threading.Lock()
 latest_auto_id = None
 
@@ -30,24 +27,26 @@ class SubHandler(object):
 
 def trigger_action_based_on_auto_id(auto_id):
     try:
-        response = requests.get(trigger_url, params={'auto_id': auto_id})
+        response = requests.get(AAS_URL, params={'auto_id': auto_id})
         if response.status_code == 200:
             href = search_id_short_and_href(response.json(), auto_id)
             if href:
-                logger.info(f"Href found in AAS Shell: {href} for Auto ID: {auto_id}")
+                logger.info(
+                    f"Href found in AAS Shell: {href} for Auto ID: {auto_id}")
             else:
-                logger.warning(f"Failed to get href for auto_id {auto_id} from AAS shell")
+                logger.warning(
+                    f"Failed to get href for Auto ID <<{auto_id}>> from AAS shell")
         else:
             logger.error(
-                f"Failed to trigger action for Auto ID: {auto_id}, status code: {response.status_code}")
+                f"Failed to trigger action for Auto ID <<{auto_id}>>, status code: {response.status_code}")
     except Exception as e:
         logger.error(
-            f"Error triggering action for Auto ID: {auto_id}, error: {e}")
+            f"Error triggering action for Auto ID <<{auto_id}>>, error: {e}")
 
 
 def search_id_short_and_href(data, target_id_short):
     if isinstance(data, dict):
-        if data.get("idShort") == target_id_short:
+        if data.get(ID) == target_id_short:
             endpoints = data.get("endpoints")
             if endpoints:
                 return endpoints[0].get("protocolInformation", {}).get("href")
@@ -66,7 +65,7 @@ def search_id_short_and_href(data, target_id_short):
 
 def opcua_subscriber():
     global latest_auto_id
-    client = Client(opcua_url)
+    client = Client(OPCU_URL)
 
     try:
         client.connect()
@@ -91,4 +90,3 @@ def opcua_subscriber():
     finally:
         client.disconnect()
         logger.info("Disconnected from OPC UA server")
-
