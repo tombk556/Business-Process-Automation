@@ -5,6 +5,9 @@ import time
 import threading
 import logging
 import sys
+from pymongo import MongoClient
+from .schemas import InspectionInstance
+
 sys.path.append('../')
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
@@ -16,6 +19,9 @@ ID = "idShort"  # ID to search for in AAS Shell
 latest_auto_id_lock = threading.Lock()
 latest_auto_id = None
 
+client = MongoClient(settings.mongodb_url)
+db = client["BPA_DB"]
+collection = db["InspectionData"]
 
 class SubHandler(object):
     def datachange_notification(self, node, val, data):
@@ -33,6 +39,7 @@ def trigger_action_based_on_auto_id(auto_id):
             if href:
                 logger.info(
                     f"Href found in AAS Shell: {href} for Auto ID: {auto_id}")
+                collection.insert_one(InspectionInstance(auto_id=auto_id, href=href).model_dump())
             else:
                 logger.warning(
                     f"Failed to get href for Auto ID <<{auto_id}>> from AAS shell")
