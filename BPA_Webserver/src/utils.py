@@ -7,6 +7,7 @@ import logging
 import sys
 from pymongo import MongoClient
 from .schemas import InspectionInstance
+from .extractors import search_id_short_and_href
 
 sys.path.append('../')
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
@@ -51,23 +52,6 @@ def trigger_action_based_on_auto_id(auto_id):
             f"Error triggering action for Auto ID <<{auto_id}>>, error: {e}")
 
 
-def search_id_short_and_href(data, target_id_short):
-    if isinstance(data, dict):
-        if data.get(ID) == target_id_short:
-            endpoints = data.get("endpoints")
-            if endpoints:
-                return endpoints[0].get("protocolInformation", {}).get("href")
-        for value in data.values():
-            if isinstance(value, (dict, list)):
-                result = search_id_short_and_href(value, target_id_short)
-                if result:
-                    return result
-    elif isinstance(data, list):
-        for item in data:
-            result = search_id_short_and_href(item, target_id_short)
-            if result:
-                return result
-    return None
 
 
 def opcua_subscriber():
