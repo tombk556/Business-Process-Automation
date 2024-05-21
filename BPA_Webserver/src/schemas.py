@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator, Field
+from pydantic import BaseModel, Field
 from datetime import datetime
 
 class InspectionInstance(BaseModel):

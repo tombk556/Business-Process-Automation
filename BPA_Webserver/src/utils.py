@@ -1,57 +1,25 @@
 from config import settings
 from opcua import Client
-import requests
 import time
 import threading
 import logging
-import sys
-from pymongo import MongoClient
-from .schemas import InspectionInstance
-from .extractors import search_id_short_and_href
+from .extractors import trigger_action_based_on_auto_id
 
-sys.path.append('../')
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
 OPCU_URL = settings.opcua_url
-AAS_URL = settings.aas_url
-ID = "idShort"  # ID to search for in AAS Shell
 
 latest_auto_id_lock = threading.Lock()
 latest_auto_id = None
 
-client = MongoClient(settings.mongodb_url)
-db = client["BPA_DB"]
-collection = db["InspectionData"]
 
 class SubHandler(object):
     def datachange_notification(self, node, val, data):
         global latest_auto_id
         with latest_auto_id_lock:
             latest_auto_id = val
-        trigger_action_based_on_auto_id(val)
-
-
-def trigger_action_based_on_auto_id(auto_id):
-    try:
-        response = requests.get(AAS_URL, params={'auto_id': auto_id})
-        if response.status_code == 200:
-            href = search_id_short_and_href(response.json(), auto_id)
-            if href:
-                logger.info(
-                    f"Href found in AAS Shell: {href} for Auto ID: <<{auto_id}>>")
-                collection.insert_one(InspectionInstance(auto_id=auto_id, href=href).model_dump())
-            else:
-                logger.warning(
-                    f"Failed to get href for Auto ID <<{auto_id}>> from AAS shell")
-        else:
-            logger.error(
-                f"Failed to trigger action for Auto ID <<{auto_id}>>, status code: {response.status_code}")
-    except Exception as e:
-        logger.error(
-            f"Error triggering action for Auto ID <<{auto_id}>>, error: {e}")
-
-
+        trigger_action_based_on_auto_id(auto_id=val, logger=logger)
 
 
 def opcua_subscriber():
