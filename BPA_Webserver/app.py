@@ -1,12 +1,14 @@
 from flask import Flask
 import threading
 import sys
+from website.views import views
 
 sys.path.append('..')
-from src.utils import opcua_subscriber, latest_auto_id, latest_auto_id_lock
+from src.utils import opcua_subscriber
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='website/templates', static_folder='website/static')
 
+app.register_blueprint(views, url_prefix='/')
 
 if __name__ == '__main__':
     subscriber_thread = threading.Thread(target=opcua_subscriber)
