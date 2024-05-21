@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
-    fetchData();
+    const fetchButton = document.getElementById('fetch-data-button');
+    fetchButton.addEventListener('click', fetchData);
 });
 
 function fetchData() {
