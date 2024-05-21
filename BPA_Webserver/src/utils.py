@@ -39,7 +39,7 @@ def trigger_action_based_on_auto_id(auto_id):
             href = search_id_short_and_href(response.json(), auto_id)
             if href:
                 logger.info(
-                    f"Href found in AAS Shell: {href} for Auto ID: {auto_id}")
+                    f"Href found in AAS Shell: {href} for Auto ID: <<{auto_id}>>")
                 collection.insert_one(InspectionInstance(auto_id=auto_id, href=href).model_dump())
             else:
                 logger.warning(
