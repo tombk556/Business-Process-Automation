@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Display</title>
-    <!-- Include Bulma CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+    <script src="/static/index.js"></script>
 </head>
 <body>
     <section class="section">
@@ -19,14 +19,8 @@
                         <th>Timestamp</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {% for item in data %}
-                    <tr>
-                        <td>{{ item.auto_id }}</td>
-                        <td><a href="{{ item.href }}" target="_blank" class="button is-link is-small">Access Link</a></td>
-                        <td>{{ item.timestamp }}</td>
-                    </tr>
-                    {% endfor %}
+                <tbody id="data-table-body">
+                    <!-- Data will be inserted here dynamically -->
                 </tbody>
             </table>
         </div>
