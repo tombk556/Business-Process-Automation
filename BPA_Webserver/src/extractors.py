@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from config import settings
 from .schemas import InspectionInstance
 import logging
+import base64
 
 client = MongoClient(settings.mongodb_url)
 db = client["BPA_DB"]
@@ -23,7 +24,7 @@ def trigger_action_based_on_auto_id(auto_id, logger: logging.Logger):
         logger (logging.Logger): logger object to log messages
     """
     try:
-        response = requests.get(AAS_URL, params={'auto_id': auto_id})
+        response = requests.get(AAS_URL)
         if response.status_code == 200:
             href = search_id_short_and_href(response.json(), auto_id)
             if href:
@@ -31,7 +32,10 @@ def trigger_action_based_on_auto_id(auto_id, logger: logging.Logger):
                 logger.info(
                     f"Href and IP found in AAS Shell: {ip} for Auto ID: {auto_id}")
                 # TODO: More Business Logic here
-                collection.insert_one(InspectionInstance(auto_id=auto_id, ip=ip, href=href).model_dump())
+                # collection.insert_one(InspectionInstance(auto_id=auto_id, ip=ip, href=href).model_dump())
+                print("IP: ", ip )
+                id_base64 = get_submodelIdentifier(ip)
+                print("ID Base64: ", id_base64)
             else:
                 logger.warning(
                     f"Failed to get href for Auto ID <<{auto_id}>> from AAS shell")
@@ -42,6 +46,36 @@ def trigger_action_based_on_auto_id(auto_id, logger: logging.Logger):
         logger.error(
             f"Error triggering action for Auto ID <<{auto_id}>>, error: {e}")
 
+
+def get_submodelIdentifier(aas_ip_port):
+    url = f"http://{aas_ip_port}/submodels?encodedCursor=string&decodedCursor=string&level=deep&extent=withoutBlobValue"
+    submodels = get_json_from_url(url)
+
+    result = submodels["result"]
+    for model in result:
+        if model["idShort"] == "Inspection_Plan":
+            id_base64 = encode_to_base64(model["id"])
+            return id_base64
+        
+    else:
+        return None
+    
+def get_json_from_url(url):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Überprüft, ob der HTTP-Statuscode 200 (OK) ist
+        json_data = response.json()  # Wandelt die Antwort in ein JSON-Objekt um
+        return json_data
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching data from {url}: {e}")
+        return None
+
+
+def encode_to_base64(original_string: str):
+    string_bytes = original_string.encode('utf-8')
+    base64_bytes = base64.b64encode(string_bytes)
+    base64_string = base64_bytes.decode('utf-8')
+    return base64_string
 
 def search_id_short_and_href(data, target_id_short) -> str:
     """serach for idShort in the AAS Shell and return the href
