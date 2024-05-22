@@ -35,7 +35,7 @@ def trigger_action_based_on_auto_id(auto_id, logger: logging.Logger):
                 # collection.insert_one(InspectionInstance(auto_id=auto_id, ip=ip, href=href).model_dump())
                 print("IP: ", ip )
                 submodelIdentifier = get_submodelIdentifier(ip)
-                print("ID Base64: ", submodelIdentifier)
+                print("Submodel Identifier: ", submodelIdentifier)
                 inspection_plan = get_inspection_plan(ip, submodelIdentifier)
                 print("Inspection Plan: ", inspection_plan)
             else:
@@ -73,7 +73,7 @@ def get_json_from_url(url):
 
 
 def get_inspection_plan(ip_port, submodelIdentifier):
-    url = f"{ip_port}/submodels/{submodelIdentifier}/submodel-elements/Inspection_Plan/attachment"
+    url = f"http://{ip_port}/submodels/{submodelIdentifier}/submodel-elements/Inspection_Plan/attachment"
     json = get_json_from_url(url)
     if json:
         return json
