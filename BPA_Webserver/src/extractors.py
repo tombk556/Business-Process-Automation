@@ -27,10 +27,11 @@ def trigger_action_based_on_auto_id(auto_id, logger: logging.Logger):
         if response.status_code == 200:
             href = search_id_short_and_href(response.json(), auto_id)
             if href:
+                ip = href.split("/")[2]
                 logger.info(
-                    f"Href found in AAS Shell: {href} for Auto ID: {auto_id}")
+                    f"Href and IP found in AAS Shell: {ip} for Auto ID: {auto_id}")
                 # TODO: More Business Logic here
-                collection.insert_one(InspectionInstance(auto_id=auto_id, href=href).model_dump())
+                collection.insert_one(InspectionInstance(auto_id=auto_id, ip=ip, href=href).model_dump())
             else:
                 logger.warning(
                     f"Failed to get href for Auto ID <<{auto_id}>> from AAS shell")
@@ -42,7 +43,7 @@ def trigger_action_based_on_auto_id(auto_id, logger: logging.Logger):
             f"Error triggering action for Auto ID <<{auto_id}>>, error: {e}")
 
 
-def search_id_short_and_href(data, target_id_short):
+def search_id_short_and_href(data, target_id_short) -> str:
     """serach for idShort in the AAS Shell and return the href
 
     Args:
