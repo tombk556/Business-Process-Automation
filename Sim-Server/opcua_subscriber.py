@@ -2,6 +2,7 @@ from opcua import Client
 import time
 
 url = "opc.tcp://localhost:4840"
+node = "2:AutoID"
 
 class SubHandler(object):
     def datachange_notification(self, node, val, data):
@@ -15,8 +16,8 @@ if __name__ == '__main__':
         print("Client connected to server")
 
         objects = client.get_objects_node()
-        auto_id_obj = objects.get_child(["2:AutoID"])
-        auto_id_node = auto_id_obj.get_child(["2:AutoID"])
+        auto_id_obj = objects.get_child([node])
+        auto_id_node = auto_id_obj.get_child([node])
 
         handler = SubHandler()
         sub = client.create_subscription(100, handler)
