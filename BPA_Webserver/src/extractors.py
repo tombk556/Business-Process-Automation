@@ -34,8 +34,10 @@ def trigger_action_based_on_auto_id(auto_id, logger: logging.Logger):
                 # TODO: More Business Logic here
                 # collection.insert_one(InspectionInstance(auto_id=auto_id, ip=ip, href=href).model_dump())
                 print("IP: ", ip )
-                id_base64 = get_submodelIdentifier(ip)
-                print("ID Base64: ", id_base64)
+                submodelIdentifier = get_submodelIdentifier(ip)
+                print("ID Base64: ", submodelIdentifier)
+                inspection_plan = get_inspection_plan(ip, submodelIdentifier)
+                print("Inspection Plan: ", inspection_plan)
             else:
                 logger.warning(
                     f"Failed to get href for Auto ID <<{auto_id}>> from AAS shell")
@@ -69,6 +71,14 @@ def get_json_from_url(url):
         print(f"Error fetching data from {url}: {e}")
         return None
 
+
+def get_inspection_plan(ip_port, submodelIdentifier):
+    url = f"{ip_port}/submodels/{submodelIdentifier}/submodel-elements/Inspection_Plan/attachment"
+    json = get_json_from_url(url)
+    if json:
+        return json
+    else:
+        return "No Inspection Plan found"
 
 def encode_to_base64(original_string: str):
     string_bytes = original_string.encode('utf-8')
