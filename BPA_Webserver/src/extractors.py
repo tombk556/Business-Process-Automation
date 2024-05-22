@@ -56,15 +56,14 @@ def get_submodelIdentifier(aas_ip_port):
         if model["idShort"] == "Inspection_Plan":
             id_base64 = encode_to_base64(model["id"])
             return id_base64
-        
     else:
         return None
     
 def get_json_from_url(url):
     try:
         response = requests.get(url)
-        response.raise_for_status()  # Überprüft, ob der HTTP-Statuscode 200 (OK) ist
-        json_data = response.json()  # Wandelt die Antwort in ein JSON-Objekt um
+        response.raise_for_status()
+        json_data = response.json()
         return json_data
     except requests.exceptions.RequestException as e:
         print(f"Error fetching data from {url}: {e}")
