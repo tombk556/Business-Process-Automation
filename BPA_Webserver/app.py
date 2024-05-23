@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 import threading
 import sys
 from website.views import views
@@ -9,6 +9,12 @@ from src.utils import opcua_subscriber
 app = Flask(__name__, template_folder='website/templates', static_folder='website/static')
 
 app.register_blueprint(views, url_prefix='/')
+
+@app.route('/logs')
+def view_logs():
+    with open('app.log', 'r') as file:
+        logs = file.read()
+    return render_template('logs.html', logs=logs)
 
 if __name__ == '__main__':
     subscriber_thread = threading.Thread(target=opcua_subscriber)
