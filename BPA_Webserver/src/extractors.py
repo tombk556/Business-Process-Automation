@@ -33,11 +33,11 @@ def trigger_action_based_on_auto_id(auto_id, logger: logging.Logger):
                     f"Href and IP found in AAS Shell: {ip} for Auto ID: {auto_id}")
                 # TODO: More Business Logic here
                 # collection.insert_one(InspectionInstance(auto_id=auto_id, ip=ip, href=href).model_dump())
-                print("IP: ", ip )
+                logger.info(f"IP: {ip}")
                 submodelIdentifier = get_submodelIdentifier(ip)
-                print("Submodel Identifier: ", submodelIdentifier)
+                logger.info(f"Submodel Identifier: {submodelIdentifier}")
                 inspection_plan = get_inspection_plan(ip, submodelIdentifier)
-                print("Inspection Plan: ", inspection_plan)
+                logger.info(f"Inspection Plan: {inspection_plan}")
             else:
                 logger.warning(
                     f"Failed to get href for Auto ID <<{auto_id}>> from AAS shell")
