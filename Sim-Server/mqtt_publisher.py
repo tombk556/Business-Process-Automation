@@ -11,18 +11,14 @@ bmws = ["BMW X7",
         "BMW 7er Limousine",
         "BMW X5"]
 
-mqttBroker = "mqtt.eclipseprojects.io"
-client = mqtt.Client("Temperature_Inside")
+mqttBroker = "141.56.180.177"
+client = mqtt.Client(client_id="inspector")
 client.connect(mqttBroker)
 
-
-def rfid_sim_reader():
-    while True:
+print("MQTT Client Connected to Broker")
+while True:
         auto_id = str(uuid.uuid4()) + " " + random.choice(bmws)
-        client.publish("AUTO_ID", str(auto_id))
+        client.publish("bpa24", str(auto_id))
         print(str(auto_id) + " published to Topic AUTO_ID")
-        time.sleep(10)
+        time.sleep(2)
 
-
-if __name__ == '__main__':
-    rfid_sim_reader()
