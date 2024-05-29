@@ -14,6 +14,9 @@ OPCU_URL = settings.opcua_url
 AAS_URL = settings.aas_url
 ID = "idShort"  # ID to search for in AAS Shell
 
+def rfid_to_auto_id(rfid, logger: logging.Logger) -> str:
+    
+    return None
 
 
 def trigger_action_based_on_auto_id(auto_id, logger: logging.Logger):

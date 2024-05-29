@@ -7,7 +7,7 @@ def setup_logging():
     logger.setLevel(logging.INFO)
 
     # File handler
-    file_handler = RotatingFileHandler("app.log", maxBytes=2000, backupCount=5)
+    file_handler = RotatingFileHandler("app.log", maxBytes=2000000000, backupCount=5)
     file_handler.setLevel(logging.INFO)
 
     # Console handler
