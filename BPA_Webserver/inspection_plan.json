@@ -1,0 +1,58 @@
+{
+    "Inspection_Plan": {
+        "Body": {
+            "Body_free_of_damage": [
+                true,
+                false
+            ]
+        },
+        "Body_Paint": {
+            "Paint_has_correct_color": [
+                true,
+                false
+            ],
+            "Paint_is_free_of_damage": [
+                true,
+                false
+            ]
+        },
+        "Front_window": {
+            "Front_window_in_place": [
+                true,
+                false
+            ]
+        },
+        "Mirrors": {
+            "Two_mirrors_in_place": [
+                true,
+                false
+            ],
+            "Mirrors_free_of_damage": [
+                true,
+                false
+            ]
+        },
+        "Headlights": {
+            "Headlights_in_place": [
+                true,
+                false
+            ],
+            "Headlights_free_of_damage": [
+                true,
+                false
+            ]
+        },
+        "Radiator_Grill": {
+            "Radiator_Grill_in_place": [
+                true,
+                false
+            ]
+        },
+        "Brand_Badge": {
+            "Badge_in_place": [
+                true,
+                false
+            ]
+        }
+    }
+}

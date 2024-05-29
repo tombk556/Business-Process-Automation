@@ -11,13 +11,14 @@ logger = setup_logging()
 OPCUA_URL = settings.opcua_url
 
 latest_auto_id_lock = threading.Lock()
-latest_auto_id = None
+latest_auto_id = None # müsste eignetlich rfid sein
 
 class SubHandler(object):
     def datachange_notification(self, node, val, data):
         global latest_auto_id
         with latest_auto_id_lock:
             latest_auto_id = val
+        ### Funktion die RFID in Autoid umwandelt...
         trigger_action_based_on_auto_id(auto_id=val, logger=logger)
 
 def opcua_subscriber():
