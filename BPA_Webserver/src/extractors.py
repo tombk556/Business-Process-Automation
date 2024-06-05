@@ -1,9 +1,9 @@
 import requests
 from pymongo import MongoClient
 from config import settings
-from .schemas import InspectionInstance
 import logging
 import base64
+from .mqtt import mqtt_request_response_cv
 
 client = MongoClient(settings.mongodb_url)
 db = client["BPA_DB"]
@@ -12,11 +12,7 @@ ID = "idShort"  # ID to search for in AAS Shell
 
 OPCU_URL = settings.opcua_url
 AAS_URL = settings.aas_url
-ID = "idShort"  # ID to search for in AAS Shell
 
-def rfid_to_auto_id(rfid, logger: logging.Logger) -> str:
-    
-    return None
 
 
 def trigger_action_based_on_auto_id(auto_id, logger: logging.Logger):
@@ -32,15 +28,14 @@ def trigger_action_based_on_auto_id(auto_id, logger: logging.Logger):
             href = search_id_short_and_href(response.json(), auto_id)
             if href:
                 ip = href.split("/")[2]
-                logger.info(
-                    f"Href and IP found in AAS Shell: {ip} for Auto ID: {auto_id}")
-                # TODO: More Business Logic here
-                # collection.insert_one(InspectionInstance(auto_id=auto_id, ip=ip, href=href).model_dump())
+                logger.info(f"Href and IP found in AAS Shell: {ip} for Auto ID: {auto_id}")
                 logger.info(f"IP: {ip}")
                 submodelIdentifier = get_submodelIdentifier(ip)
                 logger.info(f"Submodel Identifier: {submodelIdentifier}")
                 inspection_plan = get_inspection_plan(ip, submodelIdentifier)
                 logger.info(f"Inspection Plan: {inspection_plan}")
+                mqtt_response = mqtt_request_response_cv()
+                logger.info(f"MQTT Response: {mqtt_response}")
             else:
                 logger.warning(
                     f"Failed to get href for Auto ID <<{auto_id}>> from AAS shell")

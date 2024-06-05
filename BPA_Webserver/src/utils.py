@@ -8,7 +8,7 @@ from .logging import setup_logging
 # Setup logging
 logger = setup_logging()
 
-OPCUA_URL = settings.opcua_url
+OPCUA_URL = settings.opcua_url_mockup
 
 latest_auto_id_lock = threading.Lock()
 latest_auto_id = None # müsste eignetlich rfid sein
