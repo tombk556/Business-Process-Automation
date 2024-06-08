@@ -18,6 +18,50 @@ logger = SingletonLogger()
 
 
 class OPC_UA_Subscriber:
+    """
+    OPC_UA_Subscriber Class
+
+    The `OPC_UA_Subscriber` class manages the connection to an OPC UA server, subscribes to data changes, and handles the processing of inspection plans based on RFID data.
+
+    Attributes:
+        is_simulation (bool): Indicates if the system is in simulation mode.
+        opcua_url (str): URL of the OPC UA server.
+        ass_manager (AASManager): Instance of the AASManager for handling asset administration shell operations.
+        latest_auto_id_lock (threading.Lock): Lock for synchronizing access to the latest_auto_id.
+        latest_auto_id (str): Stores the latest auto ID read from the OPC UA server.
+        client (Client): OPC UA client instance.
+        sub (Subscription): OPC UA subscription instance.
+        handler (SubHandler): Instance of the subscription handler.
+
+    Methods:
+        __init__(self, is_simulation=True):
+            Initializes the OPC_UA_Subscriber with optional simulation mode.
+
+        connect(self):
+            Connects to the OPC UA server, subscribes to the relevant data node, and handles connection errors.
+
+        run(self):
+            Runs the OPC UA subscriber in a loop, allowing it to continuously monitor for data changes.
+
+        disconnect(self):
+            Disconnects from the OPC UA server and cleans up resources.
+
+    Inner Class - SubHandler:
+        __init__(self, outer):
+            Initializes the SubHandler with a reference to the outer OPC_UA_Subscriber instance.
+
+        datachange_notification(self, node, val, data):
+            Callback for handling data changes on the subscribed node, extracting RFID data and processing inspection plans.
+
+        register_callback(self, callback):
+            Registers a callback function to handle inspection responses.
+
+    Usage:
+        subscriber = OPC_UA_Subscriber(is_simulation=True)
+        subscriber.connect()
+        subscriber.run()
+        subscriber.disconnect()
+    """
     def __init__(self, is_simulation=True):
         self.is_simulation = is_simulation
         if self.is_simulation:
@@ -49,10 +93,8 @@ class OPC_UA_Subscriber:
                     rfid_name = match.group()
                     logger.info(f"RFID: {rfid_name}")
                     self.outer.latest_auto_id = get_auto_id(rfid_name)
-                    # print(f"Auto ID: {self.outer.latest_auto_id}")
                     inspection_plan = self.outer.ass_manager.get_inspection_plan(auto_id=self.outer.latest_auto_id)
 
-                    # Aufrufen der Callback-Funktion, wenn sie existiert
                     if self.callback:
                         inspection_response = self.callback(inspection_plan)
                         self.outer.ass_manager.put_inspection_response(self.outer.latest_auto_id,

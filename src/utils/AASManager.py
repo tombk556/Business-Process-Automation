@@ -9,6 +9,68 @@ logger = SingletonLogger()
 
 
 class AASManager:
+    """
+    AASManager Class
+
+    The `AASManager` class handles communication with the Asset Administration Shell (AAS) registry to manage inspection plans and responses.
+
+    Attributes:
+        AAS_Registry_URL (str): URL of the AAS registry.
+        ID (str): Key to identify the asset in the AAS.
+
+    Methods:
+        __init__(self):
+            Initializes the AASManager and logs the initialization.
+
+        get_inspection_plan(self, auto_id):
+            Retrieves the inspection plan for a given auto_id.
+            :param auto_id: The ID of the auto for which to fetch the inspection plan.
+            :return: The inspection plan or None if an error occurs.
+
+        get_inspection_response(self, auto_id):
+            Retrieves the inspection response for a given auto_id.
+            :param auto_id: The ID of the auto for which to fetch the inspection response.
+            :return: The inspection response or None if an error occurs.
+
+        put_inspection_response(self, auto_id, json_dict):
+            Submits the inspection response (in JSON format) for a given auto_id.
+            :param auto_id: The ID of the auto for which to submit the inspection response.
+            :param json_dict: The inspection response data in JSON format.
+            :return: None.
+
+        _get_asset_href(self, data, id_short):
+            Finds the asset href in the provided data by the short identifier.
+            :param data: JSON data from which to find the href.
+            :param id_short: The short identifier for the asset.
+            :return: The href if found, otherwise None.
+
+        _get_submodelIdentifier(self, aas_ip_port, idShort):
+            Fetches the submodel identifier for a given AAS.
+            :param aas_ip_port: IP and port for AAS.
+            :param idShort: Short identifier for the submodel.
+            :return: Submodel identifier or None.
+
+        _get_attachment(self, ip_port, submodelIdentifier, idShortPath):
+            Fetches the attachment (inspection plan) for a given submodel identifier and path.
+            :param ip_port: IP and port for AAS.
+            :param submodelIdentifier: Identifier for the submodel.
+            :param idShortPath: Path for the submodel element.
+            :return: Inspection plan if found, otherwise None.
+
+        _put_attachment(self, ip_address, submodelIdentifier, idShortPath, ass_file_name, json_data):
+            Submits an attachment (inspection response) for a given submodel identifier and path.
+            :param ip_address: IP address for AAS.
+            :param submodelIdentifier: Identifier for the submodel.
+            :param idShortPath: Path for the submodel element.
+            :param ass_file_name: File name for the attachment.
+            :param json_data: JSON data for the attachment.
+            :return: None.
+
+    Usage:
+        aas_manager = AASManager()
+        inspection_plan = aas_manager.get_inspection_plan(auto_id="some_auto_id")
+        aas_manager.put_inspection_response(auto_id="some_auto_id", json_dict={"key": "value"})
+    """
     AAS_Registry_URL = settings.aas_url
     ID = "idShort"
 

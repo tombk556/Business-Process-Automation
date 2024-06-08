@@ -15,6 +15,53 @@ logger = SingletonLogger()
 
 
 class MQTTClient:
+    """
+    MQTTClient Class
+
+    The `MQTTClient` class manages communication with an MQTT broker, handling connection, messaging, and response processing for camera inspection requests and responses.
+
+    Attributes:
+        client (mqtt.Client): Instance of the MQTT client.
+        broker_address (str): Address of the MQTT broker.
+        port (int): Port number for the MQTT broker.
+        request_topic (str): MQTT topic for sending inspection requests.
+        response_topic (str): MQTT topic for receiving inspection responses.
+        response_payload (dict): Stores the received response payload.
+        is_connected (bool): Indicates if the client is connected to the broker.
+        connection_established (threading.Event): Event to signal connection establishment.
+        message_received (threading.Event): Event to signal message reception.
+
+    Methods:
+        __init__(self, broker_address_in=broker_address, port_in=port):
+            Initializes the MQTTClient with broker address and port.
+
+        on_connect(self, client, userdata, flags, reason_code, properties=None):
+            Callback for MQTT connection event, subscribing to the response topic and setting connection flags.
+
+        on_disconnect(self, client, userdata, flags, reason_code, properties):
+            Callback for MQTT disconnection event, updating connection flags.
+
+        on_message(self, client, userdata, msg: MQTTMessage):
+            Callback for message reception, decoding JSON payload and setting message received flag.
+
+        connect(self):
+            Connects the MQTT client to the broker and waits for the connection to be established.
+
+        send_request(self, message="Triggering Camera"):
+            Publishes a message to the request topic to trigger the camera.
+
+        request_response_cv(self, message="Triggering Camera", timeout=10):
+            Sends a request and waits for a response within the specified timeout period.
+
+        disconnect(self):
+            Disconnects the MQTT client from the broker and stops the loop.
+
+    Usage:
+        mqtt_client = MQTTClient()
+        mqtt_client.connect()
+        response = mqtt_client.request_response_cv()
+        mqtt_client.disconnect()
+    """
     def __init__(self, broker_address_in=broker_address, port_in=port):
         self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
         self.broker_address = broker_address_in

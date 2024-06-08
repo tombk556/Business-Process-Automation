@@ -3,6 +3,31 @@ from logging.handlers import RotatingFileHandler
 
 
 class SingletonLogger:
+    """
+    SingletonLogger Class
+
+    The `SingletonLogger` class provides a singleton implementation of a logger using Python's logging module. This ensures that only one instance of the logger is created, which can be used across different modules for consistent logging.
+
+    Attributes:
+        _instance (SingletonLogger): The singleton instance of the logger.
+        name (str): The name of the logger.
+        log_file (str): The file path for the log file.
+        logger (logging.Logger): The logger instance.
+
+    Methods:
+        __new__(cls, name=__name__, log_file="app.log"):
+            Creates a new instance of SingletonLogger if it does not already exist, and sets up the logging handlers.
+            :param name: The name of the logger.
+            :param log_file: The file path for the log file.
+            :return: The singleton logger instance.
+
+        _setup_handlers(self):
+            Sets up the logging handlers (file and console) and formatters for the logger.
+
+    Usage:
+        logger = SingletonLogger()
+        logger.info("This is an info message")
+    """
     _instance = None
 
     def __new__(cls, name=__name__, log_file="app.log"):
