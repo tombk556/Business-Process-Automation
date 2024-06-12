@@ -1,3 +1,11 @@
 {
-  "Mirrors": "mirror"
+  "Engine_Hood": "hood",
+  "Front_Bumper": "front_bumper",
+  "Radiator_Grill": "cooler",
+  "Front_Windows": "windows_front",
+  "Headlights": "front_light",
+  "Brand_Badge": "brand",
+  "Mirrors": "mirror",
+  "Car_Roof": "roof",
+  "Windshield_Wiper": "wipper"
 }

@@ -88,5 +88,5 @@ class InspectionHandler:
 
 
 if __name__ == "__main__":
-    handler = InspectionHandler()
+    handler = InspectionHandler(is_simulation=True)
     handler.main()
