@@ -10,10 +10,11 @@ import sys
 import sphinx_rtd_theme
 sys.path.insert(0, os.path.abspath('../../'))
 
-project = 'BPA SS24 Code Dokumentation'
-copyright = '2024, Tom Bischopink, Konrad Adamski'
+project = 'Business Process Automation SS24'
+copyright = '© Hochschule für Technik und Wirtschaft Dresden (HTW Dresden)'
 author = 'Tom Bischopink, Konrad Adamski'
 release = '1.0'
+version = '1.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -23,6 +24,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
     'sphinx_rtd_theme',
+    'rst2pdf.pdfbuilder'
 ]
 
 templates_path = ['_templates']
