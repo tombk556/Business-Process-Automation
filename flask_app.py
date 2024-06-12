@@ -1,6 +1,6 @@
 from flask import Flask, render_template
 from src.utils.AASManager import AASManager
-from src.utils.util_functions import get_car_name
+from src.utils.util_functions import get_car_name, get_cars_json
 import json
 app = Flask(__name__)
 ass_manager = AASManager(logger_on=False)
@@ -8,8 +8,7 @@ ass_manager = AASManager(logger_on=False)
 
 @app.route('/')
 def index():
-    with open("./config/cars_config.json") as file:
-        data = json.load(file)
+    data = get_cars_json()
     return render_template("index.html", vehicles=data)
 
 
