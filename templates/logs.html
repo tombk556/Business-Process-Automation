@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Application Logs{% endblock title %}
+
+{% block navigation %}
+    <a class="mdl-navigation__link" href="{{ url_for('index') }}">Home</a>
+{% endblock navigation %}
+
+{% block side_navigation %}
+    <a class="mdl-navigation__link" href="{{ url_for('index') }}">Home</a>
+{% endblock side_navigation %}
+
+{% block content %}
+    <div class="container">
+        <pre>{{ logs }}</pre>
+    </div>
+{% endblock content %}
+
+
+{% block styles %}
+  <style>
+        pre {
+            background-color: #f4f4f4;
+            padding: 20px;
+            border: 1px solid #ddd;
+            overflow-x: auto;
+            max-width: 100%;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+{% endblock styles %}

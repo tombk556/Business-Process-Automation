@@ -55,6 +55,20 @@ def get_rfid_forSimulation(auto_id):
         return "-1"
 
 
+def get_car_name(auto_id):
+    # JSON-Datei einlesen
+
+    with open(cars_config_json_path, 'r') as file:
+        data = json.load(file)
+
+        # Durchsuchen aller Einträge im Dictionary
+        for model, details in data.items():
+            # Überprüfen, ob die AutoID im aktuellen Modell vorhanden ist
+            if any(d.get('AutoID') == auto_id for d in details):
+                return model
+        return "-1"
+
+
 # Inspection Plan -----------
 
 def get_camera_response_key(inspection_plan_key):
