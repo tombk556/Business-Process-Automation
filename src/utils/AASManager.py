@@ -74,8 +74,10 @@ class AASManager:
     AAS_Registry_URL = settings.aas_url
     ID = "idShort"
 
-    def __init__(self):
-        logger.info("Initializing AAS Manager")
+    def __init__(self, logger_on=True):
+        self.logger_on = logger_on
+        info_temp = "Initializing AAS Manager"
+        logger.info(info_temp) if self.logger_on else print("Initializing AAS Manager")
 
     def get_inspection_plan(self, auto_id):
         """
@@ -89,7 +91,8 @@ class AASManager:
                 asset_href = self._get_asset_href(response.json(), auto_id)
                 if asset_href:
                     ip = asset_href.split("/")[2]
-                    logger.info(f"IP found in AAS Shell: {ip} for Auto ID: {auto_id}")
+                    info_temp = f"IP found in AAS Shell: {ip} for Auto ID: {auto_id}"
+                    logger.info(info_temp) if self.logger_on else print(info_temp)
                     submodelIdentifier = self._get_submodelIdentifier(ip, "Inspection_Plan")
                     inspection_plan = self._get_attachment(ip, submodelIdentifier, "Inspection_Plan")
                     return inspection_plan
@@ -109,7 +112,8 @@ class AASManager:
                 asset_href = self._get_asset_href(response.json(), auto_id)
                 if asset_href:
                     ip = asset_href.split("/")[2]
-                    logger.info(f"IP found in AAS Shell: {ip} for Auto ID: {auto_id}")
+                    info_temp = f"IP found in AAS Shell: {ip} for Auto ID: {auto_id}"
+                    logger.info(info_temp) if self.logger_on else print(info_temp)
                     submodelIdentifier = self._get_submodelIdentifier(ip, "Response_Plan")
                     inspection_plan = self._get_attachment(ip, submodelIdentifier, "Response_Placeholder")
                     return inspection_plan
@@ -175,7 +179,8 @@ class AASManager:
         for model in submodels["result"]:
             if model["idShort"] == str(idShort):
                 id_base64 = encode_to_base64(model["id"])
-                logger.info(f"Submodel Identifier: {id_base64}")
+                info_temp = f"Submodel Identifier: {id_base64}"
+                logger.info(info_temp) if self.logger_on else print(info_temp)
                 return id_base64
         logger.warning(f"No submodel identifier found for AAS: {aas_ip_port}")
         return None
@@ -192,7 +197,8 @@ class AASManager:
         response = requests.get(url)
         if response.status_code == 200:
             inspection_plan = response.json()
-            logger.info(f"{submodel_name}: {inspection_plan}")
+            info_temp = f"{submodel_name}: {inspection_plan}"
+            logger.info(info_temp) if self.logger_on else print(info_temp)
             return inspection_plan
         else:
             logger.warning(f"No {submodel_name} found for AAS: {ip_port}")

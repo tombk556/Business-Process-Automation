@@ -12,6 +12,7 @@
 
 {% block content %}
     <div class="container">
+        {% if data %}
         <table class="table">
             <tr>
                 <th><u>Aspect</u></th>
@@ -30,6 +31,9 @@
                 {% endfor %}
             {% endfor %}
         </table>
+        {% else %}
+        <h2 style="color: red;">No Inspection Plan was found!</h2>
+        {% endif %}
     </div>
 {% endblock content %}
 
