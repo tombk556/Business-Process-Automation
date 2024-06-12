@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% block doc_title %}Inspection Plan - {{ car_name }}{% endblock doc_title %}
 {% block title %}Inspection Plan - {{ car_name }}{% endblock title %}
 {% block navigation %}
     <a class="mdl-navigation__link" href="{{ url_for('inspection_response', auto_id=auto_id) }}">Inspection Response</a>

@@ -1,17 +1,48 @@
 {% extends 'base.html' %}
 
-{% block title %}Inspection Viewer{% endblock title %}
+{% block title %}Home{% endblock title %}
+
+{% block doc_title %}BPA - Home{% endblock doc_title %}
+
 
 {% block navigation %}
-    <a class="mdl-navigation__link" href="{{ url_for('view_logs') }}">Logs</a>
+<a class="mdl-navigation__link" href="{{ url_for('view_logs') }}">Logs</a>
 {% endblock navigation %}
 
 {% block side_navigation %}
-    <a class="mdl-navigation__link" href="{{ url_for('view_logs') }}">Logs</a>
+<a class="mdl-navigation__link" href="{{ url_for('view_logs') }}">Logs</a>
 {% endblock side_navigation %}
 
 {% block content %}
-    <div class="container">
-        Hallo World
-    </div>
+<br>
+<div class="container">
+    <h1>BPA - Remote Access Application</h1>
+    <p>This is the home page for your automated business process management solutions.</p>
+    <table class="mdl-data-table mdl-js-data-table">
+        <thead>
+            <tr>
+                <th>Vehicle</th>
+                <th>RFID</th>
+                <th>Auto ID</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vehicle, details in vehicles.items() %}
+            <tr>
+                <td>{{ vehicle }}</td>
+                <td>{{ details[0].RFID }}</td>
+                <td>{{ details[1].AutoID }}</td>
+                <td><a href="{{ url_for('inspection_plan', auto_id=details[1]['AutoID']) }}"
+                        class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Plan</a>
+                </td>
+                <td><a href="{{ url_for('inspection_response', auto_id=details[1]['AutoID']) }}"
+                        class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Response</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock content %}

@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Inspection Viewer</title>
+    <title>
+      {% block doc_title %}{% endblock doc_title %}
+    </title>
   <!-- Material Design Light (Google) -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
@@ -40,7 +42,13 @@
       {% endblock content %}
     </div>
   </main>
+<footer>
+  <div class="container">
+    <hr>
+    <p>&copy; 2024 Hochschule für Technik und Wirtschaft Dresden. All rights reserved.</p>
+    <p>Author: Tom Bischopink, Konrad Adamski</p>
+  </div>
+</footer>
 </div>
-
 </body>
 </html>
