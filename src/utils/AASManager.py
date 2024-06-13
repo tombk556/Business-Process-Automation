@@ -76,8 +76,19 @@ class AASManager:
 
     def __init__(self, logger_on=True):
         self.logger_on = logger_on
+        self.test_connection_successful = False
         info_temp = "Initializing AAS Manager"
         logger.info(info_temp) if self.logger_on else print("Initializing AAS Manager")
+
+    def test_connection(self):
+        try:
+            response = requests.get(self.AAS_Registry_URL, timeout=6)
+            if response.status_code == 200:
+                self.test_connection_successful = True
+            else:
+                self.test_connection_successful = False
+        except Exception as e:
+            self.test_connection_successful = False
 
     def get_inspection_plan(self, auto_id):
         """
@@ -86,7 +97,7 @@ class AASManager:
         :return: The inspection plan or the auto_id if an error occurs.
         """
         try:
-            response = requests.get(self.AAS_Registry_URL)
+            response = requests.get(self.AAS_Registry_URL, timeout=8)
             if response.status_code == 200:
                 asset_href = self._find_idShort_href(response.json(), auto_id)
                 if asset_href:

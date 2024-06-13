@@ -60,4 +60,7 @@ class SingletonLogger:
         # Add handlers to the logger
         self.logger.addHandler(file_handler)
         self.logger.addHandler(console_handler)
+        for handler in self.logger.handlers:
+            handler.flush()
+            handler.close()
 

@@ -48,17 +48,42 @@
             {% endfor %}
         </tbody>
     </table>
-    <div style="padding-top:10px;">
-        <!-- Container für den dynamisch erzeugten Button -->
-        <div id="buttonContainer"></div>
-
-        <!-- Platzhalter für die Server-Antwort -->
-        <div id="responseText">
-            Inspections Status: {{ inspection_handler_status }}
+    <div class="mdl-grid">
+        <div style="padding-top:10px; min-width: 300px;">
+            <!-- Container für den dynamisch erzeugten Button -->
+            <div id="buttonContainer"></div>
+            <!-- Platzhalter für die Server-Antwort -->
+            <div id="responseText">
+                &nbsp;Status: {{ inspection_handler_status }}
+            </div>
+        </div>
+        <div style="padding-top:10px;">
+            <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="is_simulation_switch">
+                {% if is_simulation %}
+                    <input type="checkbox" id="is_simulation_switch" class="mdl-switch__input" checked>
+                    <span class="mdl-switch__label">OPC UA Connection on Simulation Server</span>
+                {% else %}
+                    <input type="checkbox" id="is_simulation_switch" class="mdl-switch__input">
+                    <span class="mdl-switch__label">OPC UA Connection not on Simulation Server</span>
+                {% endif %}
+            </label>
         </div>
     </div>
-
     <script>
+        document.getElementById('is_simulation_switch').addEventListener('change', function() {
+            let form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/switch_settings/';  // geänderte URL
+
+            let input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'is_simulation';
+            input.value = this.checked;
+
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+        });
         function handleSubmit(inputId, autoId) {
             const inputElement = document.getElementById(inputId);
             const rfidValue = inputElement.value;
@@ -117,7 +142,7 @@
                     url: urlPath,
                     type: 'GET',
                     success: function(response) {
-                        $('#responseText').text('Inspections Status: ' + response);
+                        $('#responseText').html('&nbsp;Status: ' + response);
                         console.log("Server Response:", response);
                         // Button-Text nach der Anfrage aktualisieren
                         let newText;
@@ -125,7 +150,9 @@
                              newText = 'Start Inspection';
                         } else if (response.includes("failed")) {
                              newText = 'Test Connection';
-                        } else if (response.includes("active!")) {
+                        } else if (response.includes("inactive")) {
+                            newText = 'Test Connection';
+                        } else if (response.includes("active")) {
                             newText = 'Stop Inspection';
                         } else {
                             newText = 'Test Connection';

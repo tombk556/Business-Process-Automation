@@ -32,7 +32,11 @@
             {% endfor %}
         </table>
         {% else %}
-        <h2 style="color: red;">No Inspection Plan was found!</h2>
+            {% if warning is not none %}
+                <h2 style="color: red;">{{ warning }}</h2>
+            {% else %}
+                <h2 style="color: red;">Unexpected Error</h2>
+            {% endif %}
         {% endif %}
     </div>
 {% endblock content %}

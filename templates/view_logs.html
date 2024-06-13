@@ -13,13 +13,13 @@
 {% block content %}
     <div class="container">
         <br>
-        <pre>{{ logs }}</pre>
+        <div id="log-container">Lade Log-Daten...</div>
     </div>
 {% endblock content %}
 
 {% block styles %}
   <style>
-        pre {
+        #log-container {
             background-color: #f4f4f4;
             padding: 20px;
             border: 1px solid #ddd;
@@ -33,3 +33,26 @@
         }
     </style>
 {% endblock styles %}
+
+{% block scripts %}
+<script>
+    function fetchLogContent() {
+        $.ajax({
+            url: '/log-content/',
+            type: 'GET',
+            success: function(response) {
+                $('#log-container').html(response.log_content.join('<br>'));
+            },
+            error: function() {
+                $('#log-container').html("Fehler beim Laden der Log-Daten.");
+            }
+        });
+    }
+
+    // Initialer Aufruf, um die Log-Daten beim Laden der Seite zu holen
+    fetchLogContent();
+
+    // 12 Sekunden Intervall - 5 mal pro Minute
+    setInterval(fetchLogContent, 12000);
+</script>
+{% endblock scripts %}
