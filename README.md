@@ -89,8 +89,6 @@ cd docs
 
 sphinx-apidoc -o source/ ../src/ -f -e -M
 
-sphinx-apidoc -o source/ ../ InspectionHandler.py
-
 make html
 
 sphinx-build -b pdf source build/pdf
