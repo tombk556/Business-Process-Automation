@@ -1,3 +1,5 @@
+import threading
+import time
 from functools import partial
 from src.MQTT_Camera import MQTTClient
 from src.OPC_UA_Subscriber_AssemplyLine import OPC_UA_Subscriber
@@ -44,13 +46,29 @@ class InspectionHandler:
     """
 
     def __init__(self, is_simulation=True):
+        self.run_opcua_subscriber_thread = None
         self.is_simulation = is_simulation
+        self.test_connection_successful = False
+        self.is_connected = False
         self.opcua_subscriber = OPC_UA_Subscriber(self.is_simulation)
         self.mqtt_client = MQTTClient()
+
+    def test_connection(self):
+        self.opcua_subscriber.test_connection()
+        self.mqtt_client.connect(test=True)
+        if self.opcua_subscriber.test_connection_successful and self.mqtt_client.test_connected_successful:
+            self.test_connection_successful = True
+        else:
+            self.test_connection_successful = False
 
     def connect(self):
         self.mqtt_client.connect()
         self.opcua_subscriber.connect()
+        if self.opcua_subscriber.is_connected and self.opcua_subscriber.is_connected:
+            self.is_connected = True
+        else:
+            self.is_connected = False
+            logger.warning('InspectionHandler failed to connect!')
 
     def disconnect(self):
         self.opcua_subscriber.disconnect()
@@ -66,7 +84,7 @@ class InspectionHandler:
         logger.info(f"Inspection Response: {inspection_response}")
         return inspection_response
 
-    def run(self):
+    def run_opcua_subscriber(self):
         # Erstellen eines gebundenen Callbacks, der self enthält
         bound_get_inspection_response = partial(self.get_inspection_response)
 
@@ -77,16 +95,29 @@ class InspectionHandler:
         try:
             self.opcua_subscriber.run()
         except Exception as e:
-            print(f"An exception occurred: {e}")
+            logger.error("Error occurred while starting to run the OPC UA subscriber")
 
-    def main(self):
+    def run(self):
+        self.run_opcua_subscriber_thread = threading.Thread(target=self.run_opcua_subscriber)
+        self.run_opcua_subscriber_thread.start()
+
+    def start(self):
         self.connect()
         try:
             self.run()
-        finally:
+        except Exception as e:
+            self.disconnect()
+            logger.error("Error occurred while starting to run the OPC UA subscriber thread")
+
+    def stop(self):
+        if self.run_opcua_subscriber_thread and self.run_opcua_subscriber_thread.is_alive():
+            self.opcua_subscriber.stop()
+            self.run_opcua_subscriber_thread.join()
+            self.mqtt_client.disconnect()
+        else:
             self.disconnect()
 
 
 if __name__ == "__main__":
     handler = InspectionHandler(is_simulation=True)
-    handler.main()
+    handler.start()

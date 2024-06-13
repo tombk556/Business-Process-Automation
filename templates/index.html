@@ -44,5 +44,71 @@
             {% endfor %}
         </tbody>
     </table>
+    <div style="padding-top:10px;">
+        <!-- Container für den dynamisch erzeugten Button -->
+        <div id="buttonContainer"></div>
+
+        <!-- Platzhalter für die Server-Antwort -->
+        <div id="responseText">
+            Inspections Status: {{ inspection_handler_status }}
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            var buttonHtml;
+            // Prüfen, ob die Inspektion läuft
+            if ('{{ inspection_handler_status }}' === 'active') {
+                buttonHtml = '<button id="inspection_Button" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored button-background">Stop Inspection</button>';
+            } else if ('{{ inspection_handler_status }}' === 'inactive') {
+                buttonHtml = '<button id="inspection_Button" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored button-background">Start Inspection</button>';
+            }else {
+                buttonHtml = '<button id="inspection_Button" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored button-background">Test Connection</button>';
+            }
+
+            // Einfügen des Buttons in den Container
+            $('#buttonContainer').html(buttonHtml);
+
+            // Klick-Ereignis für den Button einrichten
+            $('#inspection_Button').click(function() {
+                var currentText = $(this).text();
+                var urlPath;
+                if (currentText === 'Start Inspection') {
+                    urlPath = '/start_inspection/';
+                } else if (currentText === 'Stop Inspection') {
+                    urlPath = '/stop_inspection/';
+                } else {
+                    urlPath = '/connect_inspection/';
+                }
+
+                $.ajax({
+                    url: urlPath,
+                    type: 'GET',
+                    success: function(response) {
+                        $('#responseText').text('Inspections Status: ' + response);
+                        console.log("Server Response:", response);
+                        // Button-Text nach der Anfrage aktualisieren
+                        let newText;
+                        if (response.includes("successful")) {
+                             newText = 'Start Inspection';
+                        } else if (response.includes("failed")) {
+                             newText = 'Test Connection';
+                        } else if (response.includes("active!")) {
+                            newText = 'Stop Inspection';
+                        } else {
+                            newText = 'Test Connection';
+                        }
+
+                        $('#inspection_Button').text(newText);
+                    },
+                    error: function() {
+                        $('#responseText').text('Fehler bei der Inspektionssteuerung.');
+                    }
+                });
+                // Fokus nach dem Klick entfernen
+                $(this).blur();
+            });
+        });
+    </script>
 </div>
 {% endblock content %}

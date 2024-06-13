@@ -1,4 +1,5 @@
 import re
+import socket
 import time
 import threading
 from opcua import Client
@@ -64,6 +65,9 @@ class OPC_UA_Subscriber:
     """
     def __init__(self, is_simulation=True):
         self.is_simulation = is_simulation
+        self.test_connection_successful = False
+        self.is_connected = False
+        self.running = False
         if self.is_simulation:
             self.opcua_url = OPCUA_URL_MOCKUP
         else:
@@ -94,40 +98,65 @@ class OPC_UA_Subscriber:
                     logger.info(f"RFID: {rfid_name}")
                     self.outer.latest_auto_id = get_auto_id(rfid_name)
                     inspection_plan = self.outer.ass_manager.get_inspection_plan(auto_id=self.outer.latest_auto_id)
-
-                    if self.callback:
-                        inspection_response = self.callback(inspection_plan)
-                        self.outer.ass_manager.put_inspection_response(self.outer.latest_auto_id,
-                                                                       inspection_response)
+                    if inspection_plan:
+                        if self.callback:
+                            inspection_response = self.callback(inspection_plan)
+                            self.outer.ass_manager.put_inspection_response(self.outer.latest_auto_id,
+                                                                           inspection_response)
 
                 else:
+                    logger.error(f"RFID: {val} unknown")
                     self.outer.latest_auto_id = "-1"
 
         def register_callback(self, callback):
             self.callback = callback
 
-    def connect(self):
+    def test_connection(self):
         try:
             self.client.connect()
-            logger.info("Connected to OPC UA server")
-            objects = self.client.get_objects_node()
-            if self.is_simulation:
-                auto_id_obj = objects.get_child([simulation_node])
-                auto_id_node = auto_id_obj.get_child([simulation_node])
-            else:
-                auto_id_node = objects.get_child(node_path)
-            self.sub = self.client.create_subscription(100, self.handler)
-            self.sub.subscribe_data_change(auto_id_node)
+            self.client.disconnect()
+            self.test_connection_successful = True
+        except socket.error as e:
+            self.test_connection_successful = False
+            logger.error(f"Network socket error on OPC UA connection!")
         except Exception as e:
-            logger.exception(f"Error connecting to OPC UA server, error: {e}")
-            self.disconnect()
+            self.test_connection_successful = False
+            logger.exception(f"Unhandled exception occurred while connecting to OPC UA server!")
 
+    def connect(self, test=False):
+        self.test_connection()
+        if self.test_connection_successful:
+            if not self.is_connected:
+                try:
+                    self.client.connect()
+                    self.is_connected = True
+                    logger.info("Connected to OPC UA server")
+                    objects = self.client.get_objects_node()
+                    if self.is_simulation:
+                        auto_id_obj = objects.get_child([simulation_node])
+                        auto_id_node = auto_id_obj.get_child([simulation_node])
+                    else:
+                        auto_id_node = objects.get_child(node_path)
+                    self.sub = self.client.create_subscription(100, self.handler)
+                    self.sub.subscribe_data_change(auto_id_node)
+                except Exception as e:
+                    self.is_connected = False
+                    logger.exception(f"Unhandled exception occurred while connecting to OPC UA server!")
     def run(self):
-        try:
-            while True:
-                time.sleep(1)
-        except KeyboardInterrupt:
-            logger.info("Stopping OPC UA Subscriber.")
+        if self.is_connected:
+            self.running = True
+            try:
+                while self.running:
+                    time.sleep(1)
+            except Exception:
+                logger.warning("Unexpected error occurred while running OPC UA subscriber")
+        else:
+            logger.warning("Not connected to OPC UA server, unable to run OPC UA subscriber")
+
+    def stop(self):
+        logger.info("Stopping OPC UA Subscriber")
+        self.running = False
+        self.disconnect()
 
     def disconnect(self):
         if self.client:

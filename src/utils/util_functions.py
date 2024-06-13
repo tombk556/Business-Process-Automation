@@ -8,6 +8,7 @@ from config.env_config import settings
 cars_config_json_path = os.path.join(settings.main_path, 'cars_config.json')
 
 inspection_plan_response_config_path = os.path.join(settings.main_path, 'inspection_plan_response_config.json')
+flask_variables_path = os.path.join(settings.main_path, 'flask_variables.json')
 
 
 def encode_to_base64(original_string: str):
@@ -18,7 +19,6 @@ def encode_to_base64(original_string: str):
 
 
 # Cars -------------------------------------
-
 def get_cars_json():
     try:
         with open(cars_config_json_path, 'r') as file:
@@ -49,7 +49,6 @@ def get_auto_id(rfid):
 
 
 def get_rfid_forSimulation(auto_id):
-
     # JSON-Datei einlesen
     data = get_cars_json()
     if data:

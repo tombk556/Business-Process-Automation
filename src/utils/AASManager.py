@@ -97,7 +97,7 @@ class AASManager:
                     inspection_plan = self._get_attachment(ip, submodelIdentifier, "Inspection_Plan")
                     return inspection_plan
         except Exception as e:
-            logger.error(e)
+            logger.error(f"Error getting inspection plan from AAS Shell. {e}")
         return None
 
     def get_inspection_response(self, auto_id):
