@@ -150,6 +150,7 @@ class OPC_UA_Subscriber:
                     time.sleep(1)
             except Exception:
                 logger.warning("Unexpected error occurred while running OPC UA subscriber")
+                self.is_connected = False
         else:
             logger.warning("Not connected to OPC UA server, unable to run OPC UA subscriber")
 
