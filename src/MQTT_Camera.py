@@ -62,6 +62,7 @@ class MQTTClient:
         response = mqtt_client.request_response_cv()
         mqtt_client.disconnect()
     """
+
     def __init__(self, broker_address_in=broker_address, port_in=port):
         self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
         self.broker_address = broker_address_in
@@ -69,7 +70,7 @@ class MQTTClient:
         self.request_topic = request_topic
         self.response_topic = response_topic
         self.response_payload = None
-        self.test_connected_successful = False
+        self.test_connection_successful = False
         self.is_connected = False
         self.connection_established = threading.Event()
         self.message_received = threading.Event()
@@ -83,12 +84,12 @@ class MQTTClient:
             self.connection_established.set()
         else:
             self.is_connected = False
-            logger.warning(f"Connection failed with reason code {reason_code}")
+            logger.warning(f"MQTT connection failed on topic {self.response_topic} with reason code {reason_code}")
 
     def on_disconnect(self, client, userdata, flags, reason_code, properties):
         self.is_connected = False
         if reason_code != 0:
-            logger.warning(f"Unexpected disconnection with reason code {reason_code} and properties {properties}")
+            logger.warning(f"Unexpected MQTT disconnection with reason code {reason_code} and properties {properties}")
         self.connection_established.clear()
 
     def on_message(self, client, userdata, msg: MQTTMessage):
@@ -97,20 +98,29 @@ class MQTTClient:
                 self.response_payload = json.loads(msg.payload.decode())
                 logger.info(f"Inspection Data from MQTT: {self.response_payload}")
             except json.JSONDecodeError:
-                print("Error decoding JSON")
+                print(f"Error decoding JSON from MQTT on topic {self.response_topic}")
             self.message_received.set()
 
-    def connect(self, test=False):
+    def test_connection(self):
         if not self.is_connected:
-            self.client.connect(self.broker_address, self.port)
-            if test:
-                self.test_connected_successful = True
+            try:
+                self.client.connect(self.broker_address, self.port)
+                self.test_connection_successful = True
                 self.client.disconnect()
-            else:
+            except Exception as e:
+                logger.error("Error connecting to MQTT-Broker")
+
+    def connect(self):
+        if not self.is_connected:
+            self.test_connection()
+            if self.test_connection_successful:
+                self.client.connect(self.broker_address, self.port)
                 self.is_connected = True
-                logger.info(f"Connected and subscribed to MQTT-Broker with topic: {self.response_topic}")
+                logger.info(f"Connected and subscribed to MQTT-Broker on topic: {self.response_topic}")
                 self.client.loop_start()
                 self.connection_established.wait()
+            else:
+                self.is_connected = False
 
     def send_request(self, message="Triggering Camera"):
         self.client.publish(self.request_topic, message)
@@ -130,4 +140,3 @@ class MQTTClient:
             self.client.disconnect()
             self.is_connected = False
             logger.info("Disconnected from MQTT server")
-

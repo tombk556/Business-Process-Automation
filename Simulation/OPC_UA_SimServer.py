@@ -8,7 +8,7 @@ from src.utils.util_functions import get_rfid_forSimulation
 url = "opc.tcp://0.0.0.0:4840"  # replace with the actual IP address of the OPCUA server
 node = "RFID-Reader_Data"
 
-
+valid_ids = ["BMW_X7", "BMW_M4", "Mini Cooper SE"]  # Liste der gültigen Auto-IDs
 server = Server()
 server.set_endpoint(url)
 
@@ -23,9 +23,8 @@ auto_id.set_writable()
 
 
 def input_listener():
-    valid_ids = ["BMW_X7", "BMW_M4"]  # Liste der gültigen Auto-IDs
     while True:
-        new_auto_id = input("Enter new car ID [BMW_X7, BMW_M4]:\n")
+        new_auto_id = input(f"Enter new car ID [{', '.join(valid_ids)}]:\n")
         if new_auto_id in valid_ids:  # Überprüft, ob die Eingabe in der Liste der gültigen IDs ist
             rfid_string = get_rfid_forSimulation(new_auto_id)
             auto_id.set_value(rfid_string)

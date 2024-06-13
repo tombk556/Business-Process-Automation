@@ -88,7 +88,7 @@ class AASManager:
         try:
             response = requests.get(self.AAS_Registry_URL)
             if response.status_code == 200:
-                asset_href = self._get_asset_href(response.json(), auto_id)
+                asset_href = self._find_idShort_href(response.json(), auto_id)
                 if asset_href:
                     ip = asset_href.split("/")[2]
                     info_temp = f"IP found in AAS Shell: {ip} for Auto ID: {auto_id}"
@@ -97,7 +97,8 @@ class AASManager:
                     inspection_plan = self._get_attachment(ip, submodelIdentifier, "Inspection_Plan")
                     return inspection_plan
         except Exception as e:
-            logger.error(f"Error getting inspection plan from AAS Shell. {e}")
+            info_temp = f"Failed to get inspection plan from AAS Shell for {auto_id}: {e}"
+            logger.error(info_temp) if self.logger_on else print(info_temp)
         return None
 
     def get_inspection_response(self, auto_id):
@@ -109,7 +110,7 @@ class AASManager:
         try:
             response = requests.get(self.AAS_Registry_URL)
             if response.status_code == 200:
-                asset_href = self._get_asset_href(response.json(), auto_id)
+                asset_href = self._find_idShort_href(response.json(), auto_id)
                 if asset_href:
                     ip = asset_href.split("/")[2]
                     info_temp = f"IP found in AAS Shell: {ip} for Auto ID: {auto_id}"
@@ -131,41 +132,56 @@ class AASManager:
         try:
             response = requests.get(self.AAS_Registry_URL)
             if response.status_code == 200:
-                asset_href = self._get_asset_href(response.json(), auto_id)
+                asset_href = self._find_idShort_href(response.json(), auto_id)
                 if asset_href:
                     ip = asset_href.split("/")[2]
                     logger.info(f"IP found in AAS Shell: {ip} for Auto ID: {auto_id}")
                     submodelIdentifier = self._get_submodelIdentifier(ip, "Response_Plan")
-                    self._put_attachment(ip, submodelIdentifier, "Response_Placeholder",
+                    self._put_attachment(ip, submodelIdentifier, auto_id, "Response_Placeholder",
                                          "InspectionResponse.json", json_dict)
 
         except Exception as e:
             logger.error(e)
         return None
 
-    def _get_asset_href(self, data, id_short):
+    import requests
+
+    def get_all_idShorts(self):
         """
-        Get asset href by id_short.
-        :param data: JSON data from which to find the href.
-        :param id_short: The short identifier for the asset.
-        :return: The href if found, otherwise None.
+        Extracts all 'idShort' values from the JSON data under the 'result' key.
+        :return: A list of all 'idShort' values.
         """
-        if isinstance(data, dict):
-            if data.get(self.ID) == id_short:
-                endpoints = data.get("endpoints")
+        idShort_list = []
+        try:
+            response = requests.get(self.AAS_Registry_URL)
+            if response.status_code == 200:
+                data = response.json()
+                results = data.get('result', [])  # Access the 'result' key which is a list of assets
+
+                for item in results:
+                    if 'idShort' in item:
+                        idShort_list.append(item['idShort'])  # Add 'idShort' to the list if it exists in the dictionary
+
+        except requests.RequestException as e:
+            print(f"Failed to retrieve data: {e}")
+
+        return idShort_list
+
+    def _find_idShort_href(self, data, search_idShort):
+        """
+        Retrieves the 'href' of the first endpoint for a specific 'idShort' from the provided JSON data.
+        :param data: JSON data to search through.
+        :param search_idShort: The 'idShort' value to search for.
+        :return: The 'href' string if found, otherwise None.
+        """
+        results = data.get('result', [])  # Access the 'result' key which is a list of assets
+        for item in results:
+            if item.get('idShort') == search_idShort:
+                endpoints = item.get("endpoints")
                 if endpoints:
+                    # Return the 'href' from the first endpoint's protocolInformation if available
                     return endpoints[0].get("protocolInformation", {}).get("href")
-            for value in data.values():
-                if isinstance(value, (dict, list)):
-                    result = self._get_asset_href(value, id_short)
-                    if result:
-                        return result
-        elif isinstance(data, list):
-            for item in data:
-                result = self._get_asset_href(item, id_short)
-                if result:
-                    return result
-        return None
+        return None  # Return None if the 'idShort' was not found or the 'href' is not available
 
     def _get_submodelIdentifier(self, aas_ip_port, idShort):
         """
@@ -196,15 +212,16 @@ class AASManager:
         submodel_name = idShortPath.replace("_", " ")
         response = requests.get(url)
         if response.status_code == 200:
-            inspection_plan = response.json()
-            info_temp = f"{submodel_name}: {inspection_plan}"
-            logger.info(info_temp) if self.logger_on else print(info_temp)
-            return inspection_plan
+            inspection_attachment = response.json()
+            info_temp = f"{submodel_name}: {inspection_attachment}"
+            logger.info(info_temp) if self.logger_on else None
+            return inspection_attachment
         else:
-            logger.warning(f"No {submodel_name} found for AAS: {ip_port}")
+            info_temp = f"No {submodel_name} found for AAS: {ip_port}"
+            logger.warning(info_temp) if self.logger_on else print(info_temp)
             return None
 
-    def _put_attachment(self, ip_address, submodelIdentifier, idShortPath, ass_file_name, json_data):
+    def _put_attachment(self, ip_address, submodelIdentifier, auto_id, idShortPath, ass_file_name, json_data):
         url = f"http://{ip_address}/submodels/{submodelIdentifier}/submodel-elements/{idShortPath}/attachment?fileName={ass_file_name}"
         json_string = json.dumps(json_data, indent=4).encode('utf-8')
 
@@ -220,6 +237,6 @@ class AASManager:
 
         # Antwort prüfen
         if response.status_code == 200:
-            print("Attachment erfolgreich hinzugefügt.")
+            logger.info(f"Inspection response successfully put into AAS Shell for {auto_id}")
         else:
-            print("Fehler beim Hinzufügen des Attachments:", response.status_code, response.text)
+            logger.warning(f"Putting into AAS Shell for {auto_id} failed!")

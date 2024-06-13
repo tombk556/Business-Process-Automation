@@ -1,15 +1,34 @@
 {
     "Mini Cooper": [
-        {"RFID": "ANT1E00401002085AFE48"},
-        {"AutoID": "minicooper"}
+        {
+            "RFID": "ANT1E00401002085AFE48"
+        },
+        {
+            "AutoID": "minicooper"
+        }
     ],
     "BMW X7": [
-        {"RFID": "ANT1E00401002085C43D8"},
-        {"AutoID": "BMW_X7"}
+        {
+            "RFID": "ANT1E00401002085C43D8"
+        },
+        {
+            "AutoID": "BMW_X7"
+        }
     ],
     "BMW M4": [
-        {"RFID": "ANT1E0040100208558F48"},
-        {"AutoID": "BMW_M4"}
+        {
+            "RFID": "ANT1E0040100208558F48"
+        },
+        {
+            "AutoID": "BMW_M4"
+        }
+    ],
+    "Mini Cooper SE": [
+        {
+            "RFID": ""
+        },
+        {
+            "AutoID": "Mini_Cooper_SE"
+        }
     ]
-
 }

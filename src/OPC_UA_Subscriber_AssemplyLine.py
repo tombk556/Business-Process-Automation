@@ -63,6 +63,7 @@ class OPC_UA_Subscriber:
         subscriber.run()
         subscriber.disconnect()
     """
+
     def __init__(self, is_simulation=True):
         self.is_simulation = is_simulation
         self.test_connection_successful = False
@@ -103,6 +104,8 @@ class OPC_UA_Subscriber:
                             inspection_response = self.callback(inspection_plan)
                             self.outer.ass_manager.put_inspection_response(self.outer.latest_auto_id,
                                                                            inspection_response)
+                        else:
+                            logger.warning("No callback function defined for OPC UA Subscriber.")
 
                 else:
                     logger.error(f"RFID: {val} unknown")
@@ -142,6 +145,7 @@ class OPC_UA_Subscriber:
                 except Exception as e:
                     self.is_connected = False
                     logger.exception(f"Unhandled exception occurred while connecting to OPC UA server!")
+
     def run(self):
         if self.is_connected:
             self.running = True

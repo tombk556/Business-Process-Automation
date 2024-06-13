@@ -76,6 +76,58 @@ def get_car_name(auto_id):
     return "-1"
 
 
+def save_car_data(data):
+    try:
+        with open(cars_config_json_path, 'w') as file:
+            json.dump(data, file, indent=4)
+            return True
+    except IOError as e:
+        print(f'Failed to write to cars_confing.json: {e}')
+    return False
+
+
+def update_car_data(auto_id_list):
+    data_changed = False
+    data = get_cars_json()
+    if data:
+        for auto_id in auto_id_list:
+            found = False
+            # Durchsuche jedes Auto im JSON
+            for key, values in data.items():
+                for value in values:
+                    if value.get("AutoID", "").replace("_", "").lower() == auto_id.replace("_", "").lower():
+                        found = True
+                        break
+                if found:
+                    break
+
+            if not found:
+                print(auto_id, "not found")
+                # Neuen Schlüsselnamen aus AutoID generieren
+                key_name = auto_id.replace('_', ' ')
+                # Neues Auto hinzufügen
+                data[key_name] = [{"RFID": None}, {"AutoID": auto_id}]
+                data_changed = True
+
+    if data_changed:
+        return save_car_data(data)
+
+
+def set_car_rfid(auto_id, new_rfid):
+    model_name = get_car_name(auto_id)
+    if model_name == "-1":
+        print(f'AutoID "{auto_id}" not found in the data.')
+        return False
+
+    data = get_cars_json()
+    if data and model_name in data:
+        for entry in data[model_name]:
+            if entry.get("AutoID") == auto_id:
+                data[model_name] = [{"RFID": new_rfid}, {"AutoID": auto_id}]
+                return save_car_data(data)
+    return False
+
+
 # Inspection Plan -----------
 
 def get_camera_response_key(inspection_plan_key):

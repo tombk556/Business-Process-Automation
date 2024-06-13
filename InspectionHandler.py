@@ -4,7 +4,7 @@ from functools import partial
 from src.MQTT_Camera import MQTTClient
 from src.OPC_UA_Subscriber_AssemplyLine import OPC_UA_Subscriber
 from src.utils.Logger import SingletonLogger
-from src.utils.util_ass_response import get_response_plan
+from src.utils.util_ass_response import create_response_plan
 from src.utils.util_camera_inspection_response import get_simplified_inspection_response
 
 logger = SingletonLogger()
@@ -55,8 +55,8 @@ class InspectionHandler:
 
     def test_connection(self):
         self.opcua_subscriber.test_connection()
-        self.mqtt_client.connect(test=True)
-        if self.opcua_subscriber.test_connection_successful and self.mqtt_client.test_connected_successful:
+        self.mqtt_client.test_connection()
+        if self.opcua_subscriber.test_connection_successful and self.mqtt_client.test_connection_successful:
             self.test_connection_successful = True
         else:
             self.test_connection_successful = False
@@ -79,9 +79,9 @@ class InspectionHandler:
             message="Triggering Camera", timeout=2)
         camera_response_simplified = get_simplified_inspection_response(
             camera_response, 0.6)
-        inspection_response = get_response_plan(
+        inspection_response = create_response_plan(
             inspection_plan, camera_response_simplified)
-        logger.info(f"Inspection Response: {inspection_response}")
+        logger.info(f"Created Inspection Response: {inspection_response}")
         return inspection_response
 
     def run_opcua_subscriber(self):

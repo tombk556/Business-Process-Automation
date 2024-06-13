@@ -32,7 +32,11 @@
             {% for vehicle, details in vehicles.items() %}
             <tr>
                 <td>{{ vehicle }}</td>
-                <td>{{ details[0].RFID }}</td>
+                <td>
+                    <input style="min-width: 200px;" type="text" id="rfid-{{ loop.index }}" placeholder="Enter RFID"
+                        value="{% if details[0].RFID is not none %}{{ details[0].RFID }}{% endif %}"
+                        onchange="handleSubmit('rfid-{{ loop.index }}', '{{ details[1].AutoID }}')">
+                </td>
                 <td>{{ details[1].AutoID }}</td>
                 <td><a href="{{ url_for('inspection_plan', auto_id=details[1]['AutoID']) }}"
                         class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Plan</a>
@@ -55,6 +59,34 @@
     </div>
 
     <script>
+        function handleSubmit(inputId, autoId) {
+            const inputElement = document.getElementById(inputId);
+            const rfidValue = inputElement.value;
+
+            // Create a form element
+            const formElement = document.createElement('form');
+            formElement.method = 'post';
+            formElement.action = window.location.href;
+
+            // Add hidden input elements
+            const rfidInput = document.createElement('input');
+            rfidInput.type = 'hidden';
+            rfidInput.name = 'RFID';
+            rfidInput.value = rfidValue;
+            formElement.appendChild(rfidInput);
+
+            const autoIdInput = document.createElement('input');
+            autoIdInput.type = 'hidden';
+            autoIdInput.name = 'autoId';
+            autoIdInput.value = autoId;
+            formElement.appendChild(autoIdInput);
+
+            // Add the form to the body and submit it
+            document.body.appendChild(formElement);
+            formElement.submit();
+        }
+
+
         $(document).ready(function() {
             var buttonHtml;
             // Prüfen, ob die Inspektion läuft

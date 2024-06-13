@@ -2,12 +2,12 @@ from src.utils.util_camera_inspection_response import get_value
 from src.utils.util_functions import get_camera_response_key
 
 
-def get_response_plan(inspection_plan, inspection_response_simplified):
+def create_response_plan(inspection_plan, inspection_response_simplified):
     inspection_plan_part = inspection_plan['Inspection_Plan']
     response_plan = {
-        "ResponsePlan": {}
+        "Response_Plan": {}
     }
-    response_plan_part = response_plan["ResponsePlan"]
+    response_plan_part = response_plan["Response_Plan"]
     # Durchgehen des 'Inspection_Plan'-Teils
     for class_name, details in inspection_plan_part.items():
         response_plan_part[class_name] = {}
