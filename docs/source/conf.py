@@ -11,7 +11,7 @@ import sphinx_rtd_theme
 sys.path.insert(0, os.path.abspath('../../'))
 
 project = 'Business Process Automation SS24'
-copyright = '© Hochschule für Technik und Wirtschaft Dresden (HTW Dresden)'
+copyright = '© 2024 Hochschule für Technik und Wirtschaft Dresden. All rights reserved.'
 author = 'Tom Bischopink, Konrad Adamski'
 release = '1.0'
 version = '1.0'

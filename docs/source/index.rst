@@ -23,7 +23,6 @@ Getting Started
    :maxdepth: 2
    :caption: Contents:
 
-   inspection_app
    modules
 
 
