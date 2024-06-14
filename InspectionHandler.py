@@ -2,7 +2,7 @@ import threading
 import time
 from functools import partial
 from src.MQTT_Camera import MQTTClient
-from src.OPC_UA_Subscriber_AssemplyLine import OPC_UA_Subscriber
+from src.OPC_UA_Subscriber_RFID_Reader import OPC_UA_Subscriber
 from src.utils.Logger import SingletonLogger
 from src.utils.util_ass_response import create_response_plan
 from src.utils.util_camera_inspection_response import get_simplified_inspection_response

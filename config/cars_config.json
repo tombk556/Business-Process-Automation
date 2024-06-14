@@ -1,12 +1,4 @@
 {
-    "Mini Cooper": [
-        {
-            "RFID": "ANT1E00401002085AFE48"
-        },
-        {
-            "AutoID": "minicooper"
-        }
-    ],
     "BMW X7": [
         {
             "RFID": "ANT1E00401002085C43D8"
@@ -25,7 +17,7 @@
     ],
     "Mini Cooper SE": [
         {
-            "RFID": null
+            "RFID": "ANT1E00401002085AFE48"
         },
         {
             "AutoID": "Mini_Cooper_SE"
