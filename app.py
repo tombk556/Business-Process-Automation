@@ -8,10 +8,16 @@ from src.utils.AASManager import AASManager
 from src.utils.util_functions import get_car_name, get_cars_json, update_car_data, set_car_rfid
 
 app = Flask(__name__)
+stop_event = threading.Event()
 
 
 def run_handler():
-    handler.start()
+    handler.connect()
+    try:
+        while not stop_event.is_set():
+            time.sleep(1)
+    except Exception:
+        print("Exception occurred")
 
 
 @app.route('/switch_settings/', methods=['POST'])
@@ -60,25 +66,25 @@ def connect_inspection():
 def start_inspection():
     global handler_thread
     if not handler.is_connected:
-        if handler_thread is None:
-            try:
-                handler_thread = threading.Thread(target=run_handler)
-                handler_thread.start()
-                time.sleep(1)
-            except Exception as e:
-                return f"failed"
-            finally:
-                return "active"
+        try:
+            handler_thread = threading.Thread(target=run_handler)
+            handler_thread.start()
+            time.sleep(1)
+        except Exception as e:
+            stop_event.set()
+            return f"failed"
+        finally:
+            return "active"
     return "already active"
 
 
 @app.route('/stop_inspection/')
 def stop_inspection():
     global handler_thread
-    if handler.is_connected and handler_thread is not None:
-        handler.stop()  # Assuming there is a safe .stop() method
+    if handler.is_connected:
+        stop_event.set()
         handler_thread.join()  # Wait for the thread to finish
-        handler_thread = None
+        handler.disconnect()
         time.sleep(1)
         return "inactive"
     else:

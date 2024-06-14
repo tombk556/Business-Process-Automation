@@ -90,6 +90,7 @@ class MQTTClient:
         self.is_connected = False
         if reason_code != 0:
             logger.warning(f"Unexpected MQTT disconnection with reason code {reason_code} and properties {properties}")
+            self.test_connection_successful = False
         self.connection_established.clear()
 
     def on_message(self, client, userdata, msg: MQTTMessage):
@@ -109,6 +110,8 @@ class MQTTClient:
                 self.client.disconnect()
             except Exception as e:
                 logger.error("Error connecting to MQTT-Broker")
+                self.is_connected = False
+                self.test_connection_successful = False
 
     def connect(self):
         if not self.is_connected:

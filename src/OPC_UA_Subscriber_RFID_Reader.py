@@ -1,6 +1,5 @@
 import re
 import socket
-import time
 import threading
 from opcua import Client
 
@@ -68,12 +67,10 @@ class OPC_UA_Subscriber:
         self.is_simulation = is_simulation
         self.test_connection_successful = False
         self.is_connected = False
-        self.running = False
         if self.is_simulation:
             self.opcua_url = OPCUA_URL_MOCKUP
         else:
             self.opcua_url = OPCUA_URL
-
         self.ass_manager = AASManager()
         self.latest_auto_id_lock = threading.Lock()
         self.latest_auto_id = None
@@ -114,6 +111,7 @@ class OPC_UA_Subscriber:
                 else:
                     logger.error(f"RFID: {str(val)}")
                     self.outer.latest_auto_id = "None"
+
         def register_callback(self, callback):
             self.callback = callback
 
@@ -149,24 +147,8 @@ class OPC_UA_Subscriber:
                     self.is_connected = False
                     logger.exception(f"Unhandled exception occurred while connecting to OPC UA server!")
 
-    def run(self):
-        if self.is_connected:
-            self.running = True
-            try:
-                while self.running:
-                    time.sleep(1)
-            except Exception:
-                logger.warning("Unexpected error occurred while running OPC UA subscriber")
-                self.is_connected = False
-        else:
-            logger.warning("Not connected to OPC UA server, unable to run OPC UA subscriber")
-
-    def stop(self):
-        logger.info("Stopping OPC UA Subscriber")
-        self.running = False
-        self.disconnect()
-
     def disconnect(self):
         if self.client:
             self.client.disconnect()
-            logger.info("Disconnected from OPC UA server")
+            self.is_connected = False
+            logger.info("Disconnected from OPC UA Server")
