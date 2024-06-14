@@ -108,7 +108,7 @@ class OPC_UA_Subscriber:
                             logger.warning("No callback function defined for OPC UA Subscriber.")
 
                 else:
-                    logger.error(f"RFID: {val} unknown")
+                    logger.error(f"RFID: {val}")
                     self.outer.latest_auto_id = "-1"
 
         def register_callback(self, callback):
