@@ -72,7 +72,7 @@ class InspectionHandler:
     def connect(self):
         self.mqtt_client.connect()
         self.opcua_subscriber.connect()
-        if self.opcua_subscriber.is_connected and self.opcua_subscriber.is_connected:
+        if self.opcua_subscriber.is_connected and self.mqtt_client.is_connected:
             self.is_connected = True
         else:
             self.is_connected = False
