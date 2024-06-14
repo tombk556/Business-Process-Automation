@@ -88,29 +88,32 @@ class OPC_UA_Subscriber:
 
         def datachange_notification(self, node, val, data):
             with self.outer.latest_auto_id_lock:
-                element_list = val.split("\n")
-                if len(element_list) >= 2:
-                    element = element_list[0]
-                else:
-                    element = val
-                match = re.search(r'ANT.*', element)
-                if match:
-                    rfid_name = match.group()
-                    logger.info(f"RFID: {rfid_name}")
-                    self.outer.latest_auto_id = get_auto_id(rfid_name)
-                    inspection_plan = self.outer.ass_manager.get_inspection_plan(auto_id=self.outer.latest_auto_id)
-                    if inspection_plan:
-                        if self.callback:
-                            inspection_response = self.callback(inspection_plan)
-                            self.outer.ass_manager.put_inspection_response(self.outer.latest_auto_id,
-                                                                           inspection_response)
-                        else:
-                            logger.warning("No callback function defined for OPC UA Subscriber.")
+                if val and val != "None":
+                    element_list = val.split("\n")
+                    if len(element_list) >= 2:
+                        element = element_list[0]
+                    else:
+                        element = val
+                    match = re.search(r'ANT.*', element)
+                    if match:
+                        rfid_name = match.group()
+                        logger.info(f"RFID: {rfid_name}")
+                        self.outer.latest_auto_id = get_auto_id(rfid_name)
+                        inspection_plan = self.outer.ass_manager.get_inspection_plan(auto_id=self.outer.latest_auto_id)
+                        if inspection_plan:
+                            if self.callback:
+                                inspection_response = self.callback(inspection_plan)
+                                self.outer.ass_manager.put_inspection_response(self.outer.latest_auto_id,
+                                                                               inspection_response)
+                            else:
+                                logger.warning("No callback function defined for OPC UA Subscriber.")
 
+                    else:
+                        logger.error(f"RFID: {str(val)}")
+                        self.outer.latest_auto_id = "None"
                 else:
-                    logger.error(f"RFID: {val}")
-                    self.outer.latest_auto_id = "-1"
-
+                    logger.error(f"RFID: {str(val)}")
+                    self.outer.latest_auto_id = "None"
         def register_callback(self, callback):
             self.callback = callback
 

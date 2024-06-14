@@ -45,7 +45,7 @@ def get_auto_id(rfid):
                 # Extrahieren der AutoID, wenn die RFID gefunden wird
                 auto_id = next((d.get('AutoID') for d in details if 'AutoID' in d), None)
                 return auto_id
-    return "-1"
+    return None
 
 
 def get_rfid_forSimulation(auto_id):
@@ -58,9 +58,9 @@ def get_rfid_forSimulation(auto_id):
             if any(d.get('AutoID') == auto_id for d in details):
                 # Extrahieren der RFID, wenn die AutoID gefunden wird
                 rfid = next((d.get('RFID') for d in details if 'RFID' in d), None)
-                rfid_element = f"[]{rfid}\n[]ANT2..."
+                rfid_element = f"[]{rfid}\n[]ANT2..." if rfid else None
                 return rfid_element
-    return "-1"
+    return None
 
 
 def get_car_name(auto_id):
@@ -73,7 +73,7 @@ def get_car_name(auto_id):
             # Überprüfen, ob die AutoID im aktuellen Modell vorhanden ist
             if any(d.get('AutoID') == auto_id for d in details):
                 return model
-    return "-1"
+    return None
 
 
 def save_car_data(data):
