@@ -14,61 +14,77 @@
 {% endblock side_navigation %}
 
 {% block content %}
-<br>
 <div class="container">
-    <h1>BPA - Remote Access Application</h1>
-    <p>This is the home page for your automated business process management solutions.</p>
-    <table class="mdl-data-table mdl-js-data-table">
-        <thead>
-            <tr>
-                <th>Vehicle</th>
-                <th>RFID</th>
-                <th>Auto ID</th>
-                <th></th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for vehicle, details in vehicles.items() %}
-            <tr>
-                <td>{{ vehicle }}</td>
-                <td>
-                    <input style="min-width: 200px;" type="text" id="rfid-{{ loop.index }}" placeholder="Enter RFID"
-                        value="{% if details[0].RFID is not none %}{{ details[0].RFID }}{% endif %}"
-                        onchange="handleSubmit('rfid-{{ loop.index }}', '{{ details[1].AutoID }}')">
-                </td>
-                <td>{{ details[1].AutoID }}</td>
-                <td><a href="{{ url_for('inspection_plan', auto_id=details[1]['AutoID']) }}"
-                        class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Plan</a>
-                </td>
-                <td><a href="{{ url_for('inspection_response', auto_id=details[1]['AutoID']) }}"
-                        class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Response</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <div class="mdl-grid">
-        <div style="padding-top:10px; min-width: 300px;">
-            <!-- Container für den dynamisch erzeugten Button -->
-            <div id="buttonContainer"></div>
-            <!-- Platzhalter für die Server-Antwort -->
-            <div id="responseText">
-                &nbsp;Status: {{ inspection_handler_status }}
+    <div class="row">
+        <div class="col" style="padding-top: 20px;">
+            <h1>BPA - Remote Access Application</h1>
+            <p>This is the home page for your automated business process management solutions.</p>
+            <table class="mdl-data-table">
+                <thead>
+                    <tr>
+                        <th>Vehicle</th>
+                        <th>RFID</th>
+                        <th>Auto ID</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vehicle, details in vehicles.items() %}
+                    <tr>
+                        <td>{{ vehicle }}</td>
+                        <td>
+                            <input style="min-width: 200px;" type="text" id="rfid-{{ loop.index }}" placeholder="Enter RFID"
+                                value="{% if details[0].RFID is not none %}{{ details[0].RFID }}{% endif %}"
+                                onchange="handleSubmit('rfid-{{ loop.index }}', '{{ details[1].AutoID }}')">
+                        </td>
+                        <td>{{ details[1].AutoID }}</td>
+                        <td><a href="{{ url_for('inspection_plan', auto_id=details[1]['AutoID']) }}"
+                                class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Plan</a>
+                        </td>
+                        <td><a href="{{ url_for('inspection_response', auto_id=details[1]['AutoID']) }}"
+                                class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Response</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="mdl-grid">
+                <div style="padding-top:10px; min-width: 300px;">
+                    <!-- Container für den dynamisch erzeugten Button -->
+                    <div id="buttonContainer"></div>
+                    <!-- Platzhalter für die Server-Antwort -->
+                    <div id="responseText">
+                        &nbsp;Status: {{ inspection_handler_status }}
+                    </div>
+                </div>
+                <div style="padding-top:10px;">
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="is_simulation_switch">
+                        {% if is_simulation == True %}
+                            <input type="checkbox" id="is_simulation_switch" class="mdl-switch__input" checked>
+                            <span class="mdl-switch__label">OPC UA Connection on Simulation Server</span>
+                        {% else %}
+                            <input type="checkbox" id="is_simulation_switch" class="mdl-switch__input">
+                            <span class="mdl-switch__label">OPC UA Connection not on Simulation Server</span>
+                        {% endif %}
+                    </label>
+                </div>
             </div>
         </div>
-        <div style="padding-top:10px;">
-            <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="is_simulation_switch">
-                {% if is_simulation %}
-                    <input type="checkbox" id="is_simulation_switch" class="mdl-switch__input" checked>
-                    <span class="mdl-switch__label">OPC UA Connection on Simulation Server</span>
+        <div class="col d-flex justify-content-end" style="padding-top: 10px;">
+             <span style="height: 40px; line-height: 40px; display: inline-block; padding-right: 10px;">AAS Connection Check</span>
+            <div style="padding-top: 5px;">
+                 {% if ass_connection %}
+                    <button id="aas_connection_status_button" style="border-radius: 50%; height: 30px; width: 30px; background-color: green; border: none; cursor: pointer;"></button>
                 {% else %}
-                    <input type="checkbox" id="is_simulation_switch" class="mdl-switch__input">
-                    <span class="mdl-switch__label">OPC UA Connection not on Simulation Server</span>
+                    <button id="aas_connection_status_button" style="border-radius: 50%; height: 30px; width: 30px; background-color: red; border: none; cursor: pointer;"></button>
                 {% endif %}
-            </label>
+            </div>
         </div>
     </div>
+</div>
+{% endblock content %}
+{% block scripts %}
     <script>
         document.getElementById('is_simulation_switch').addEventListener('change', function() {
             let form = document.createElement('form');
@@ -84,6 +100,34 @@
             document.body.appendChild(form);
             form.submit();
         });
+
+        document.getElementById('aas_connection_status_button').addEventListener('click', function() {
+            let button = this; // Referenz auf den Button
+            //let currentState = button.style.backgroundColor === 'red' ? 'unavailable' : 'successful';
+
+            button.style.backgroundColor = 'gray';
+            button.disabled = true;
+
+            // Fügt den currentState als REST-Parameter in den Pfad ein
+            fetch('/check_aas_connection/', {
+                method: 'GET' // Verwende GET Methode
+            })
+            .then(response => response.text()) // Verarbeitet eine Textantwort vom Server
+            .then(text => {
+                if (text === 'successful') {
+                    button.style.backgroundColor = 'green';
+                    button.disabled = false;
+                } else {
+                    button.style.backgroundColor = 'red';
+                    button.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Fehler beim Anfordern:', error);
+            });
+        });
+
+
         function handleSubmit(inputId, autoId) {
             const inputElement = document.getElementById(inputId);
             const rfidValue = inputElement.value;
@@ -137,6 +181,7 @@
                 } else {
                     urlPath = '/connect_inspection/';
                 }
+                 $('#responseText').html('&nbsp;Status: ...');
 
                 $.ajax({
                     url: urlPath,
@@ -169,5 +214,4 @@
             });
         });
     </script>
-</div>
-{% endblock content %}
+{% endblock scripts %}

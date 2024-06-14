@@ -3,6 +3,7 @@
 {% block title %}Application Logs{% endblock title %}
 
 {% block navigation %}
+<a class="mdl-navigation__link" href="{{ url_for('reset_logs') }}">Reset Logs</a>
     <a class="mdl-navigation__link" href="{{ url_for('index') }}">Home</a>
 {% endblock navigation %}
 
@@ -52,7 +53,7 @@
     // Initialer Aufruf, um die Log-Daten beim Laden der Seite zu holen
     fetchLogContent();
 
-    // 12 Sekunden Intervall - 5 mal pro Minute
+    // 10 Sekunden Intervall - 6 mal pro Minute
     setInterval(fetchLogContent, 12000);
 </script>
 {% endblock scripts %}

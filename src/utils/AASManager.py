@@ -71,14 +71,15 @@ class AASManager:
         inspection_plan = aas_manager.get_inspection_plan(auto_id="some_auto_id")
         aas_manager.put_inspection_response(auto_id="some_auto_id", json_dict={"key": "value"})
     """
-    AAS_Registry_URL = settings.aas_url
     ID = "idShort"
 
     def __init__(self, logger_on=True):
         self.logger_on = logger_on
         self.test_connection_successful = False
+        self.AAS_Registry_URL = settings.aas_url
         info_temp = "Initializing AAS Manager"
-        logger.info(info_temp) if self.logger_on else print("Initializing AAS Manager")
+        logger.info(info_temp) if self.logger_on else print(info_temp)
+        self.test_connection()
 
     def test_connection(self):
         try:
@@ -86,8 +87,12 @@ class AASManager:
             if response.status_code == 200:
                 self.test_connection_successful = True
             else:
+                info_temp = "The connection to the AAS Registry failed"
+                logger.error(info_temp) if self.logger_on else print(info_temp)
                 self.test_connection_successful = False
         except Exception as e:
+            info_temp = "The connection to the AAS Registry failed due to a timeout error"
+            logger.error(info_temp) if self.logger_on else print(info_temp)
             self.test_connection_successful = False
 
     def get_inspection_plan(self, auto_id):
@@ -130,7 +135,8 @@ class AASManager:
                     inspection_plan = self._get_attachment(ip, submodelIdentifier, "Response_Placeholder")
                     return inspection_plan
         except Exception as e:
-            logger.error(e)
+            info_temp = f"Failed to get inspection response from AAS Shell for {auto_id}: {e}"
+            logger.error(info_temp) if self.logger_on else print(info_temp)
         return None
 
     def put_inspection_response(self, auto_id, json_dict):
