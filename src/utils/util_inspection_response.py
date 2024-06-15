@@ -2,7 +2,7 @@ import json
 import os
 from config.env_config import settings
 
-inspection_plan_response_config_path = os.path.join(settings.main_path, 'inspection_plan_response_config.json')
+inspection_plan_response_config_path = os.path.join(settings.config_path, 'inspection_plan_response_config.json')
 
 
 def create_response_plan(inspection_plan, inspection_response_simplified):

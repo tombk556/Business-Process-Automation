@@ -3,7 +3,7 @@ import json
 from config.env_config import settings
 from src.utils.Logger import SingletonLogger
 
-cars_config_json_path = os.path.join(settings.main_path, 'cars_config.json')
+cars_config_json_path = os.path.join(settings.config_path, 'cars_config.json')
 logger = SingletonLogger()
 
 
@@ -75,7 +75,6 @@ def update_car_data(auto_id_list):
                     break
 
             if not found:
-                print(auto_id, "not found")
                 # Neuen Schlüsselnamen aus AutoID generieren
                 key_name = auto_id.replace('_', ' ')
                 # Neues Auto hinzufügen

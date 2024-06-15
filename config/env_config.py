@@ -13,7 +13,7 @@ class Settings:
         self.mqtt_url = os.getenv("MQTT_URL")
         self.mqtt_port = os.getenv("MQTT_PORT")
 
-        self.main_path = os.path.dirname(os.path.abspath(__file__))
+        self.config_path = os.path.dirname(os.path.abspath(__file__))
 
 
 settings = Settings()
