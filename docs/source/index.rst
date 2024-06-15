@@ -24,6 +24,7 @@ Getting Started
    :caption: Contents:
 
    modules
+   InspectionHandler
 
 
 Indices and tables
