@@ -74,7 +74,7 @@
         <div class="col d-flex justify-content-end" style="padding-top: 10px;">
              <span style="height: 40px; line-height: 40px; display: inline-block; padding-right: 10px;">AAS Connection Check</span>
             <div style="padding-top: 5px;">
-                 {% if ass_connection %}
+                 {% if aas_connection %}
                     <button id="aas_connection_status_button" style="border-radius: 50%; height: 30px; width: 30px; background-color: green; border: none; cursor: pointer;"></button>
                 {% else %}
                     <button id="aas_connection_status_button" style="border-radius: 50%; height: 30px; width: 30px; background-color: red; border: none; cursor: pointer;"></button>
@@ -179,7 +179,7 @@
                 } else if (currentText === 'Stop Inspection') {
                     urlPath = '/stop_inspection/';
                 } else {
-                    urlPath = '/connect_inspection/';
+                    urlPath = '/check_connection/';
                 }
                  $('#responseText').html('&nbsp;Status: ...');
 

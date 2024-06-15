@@ -1,9 +1,11 @@
 from opcua import ua, Server
 import time
 import threading
-import sys 
+import sys
+
 sys.path.append('..')
-from src.utils.util_functions import get_rfid_forSimulation
+from src.utils.util_config_cars import get_rfid_forSimulation
+
 
 url = "opc.tcp://0.0.0.0:4840"  # replace with the actual IP address of the OPCUA server
 node = "RFID-Reader_Data"

@@ -1,7 +1,6 @@
 from opcua import Client, ua
 import time
 import threading
-
 from config.env_config import settings
 
 OPCUA_URL = settings.opcua_url

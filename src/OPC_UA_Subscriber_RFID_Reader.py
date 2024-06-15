@@ -6,7 +6,7 @@ from opcua import Client
 from config.env_config import settings
 from src.utils.AASManager import AASManager
 from src.utils.Logger import SingletonLogger
-from src.utils.util_functions import get_auto_id
+from src.utils.util_config_cars import get_auto_id
 
 OPCUA_URL_MOCKUP = settings.opcua_url_mockup
 OPCUA_URL = settings.opcua_url

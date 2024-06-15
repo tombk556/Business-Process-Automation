@@ -1,7 +1,7 @@
 import json
 import requests
 from config.env_config import settings
-from src.utils.util_functions import encode_to_base64
+from src.utils.util_aas import encode_to_base64
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 from src.utils.Logger import SingletonLogger
 
@@ -238,14 +238,14 @@ class AASManager:
             logger.warning(info_temp) if self.logger_on else print(info_temp)
             return None
 
-    def _put_attachment(self, ip_address, submodelIdentifier, auto_id, idShortPath, ass_file_name, json_data):
-        url = f"http://{ip_address}/submodels/{submodelIdentifier}/submodel-elements/{idShortPath}/attachment?fileName={ass_file_name}"
+    def _put_attachment(self, ip_address, submodelIdentifier, auto_id, idShortPath, aas_file_name, json_data):
+        url = f"http://{ip_address}/submodels/{submodelIdentifier}/submodel-elements/{idShortPath}/attachment?fileName={aas_file_name}"
         json_string = json.dumps(json_data, indent=4).encode('utf-8')
 
         # Multipart/Form-Data Encoder mit dem Dateiinhalt (oder leeren JSON)
         multipart_data = MultipartEncoder(
             fields={
-                'file': (ass_file_name, json_string, 'application/json')
+                'file': (aas_file_name, json_string, 'application/json')
             }
         )
 

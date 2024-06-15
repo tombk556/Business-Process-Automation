@@ -1,31 +1,19 @@
-import base64
-import json
-
 import os
-
+import json
 from config.env_config import settings
+from src.utils.Logger import SingletonLogger
 
 cars_config_json_path = os.path.join(settings.main_path, 'cars_config.json')
-
-inspection_plan_response_config_path = os.path.join(settings.main_path, 'inspection_plan_response_config.json')
-flask_variables_path = os.path.join(settings.main_path, 'flask_variables.json')
+logger = SingletonLogger()
 
 
-def encode_to_base64(original_string: str):
-    string_bytes = original_string.encode('utf-8')
-    base64_bytes = base64.b64encode(string_bytes)
-    base64_string = base64_bytes.decode('utf-8')
-    return base64_string
-
-
-# Cars -------------------------------------
 def get_cars_json():
     try:
         with open(cars_config_json_path, 'r') as file:
             data = json.load(file)
             return data
     except FileNotFoundError:
-        print('cars config file not found')
+        logger.error(f'cars_config file on {str(cars_config_json_path)} not found')
         return None
 
 
@@ -48,21 +36,6 @@ def get_auto_id(rfid):
     return None
 
 
-def get_rfid_forSimulation(auto_id):
-    # JSON-Datei einlesen
-    data = get_cars_json()
-    if data:
-        # Durchsuchen aller Einträge im Dictionary
-        for model, details in data.items():
-            # Überprüfen, ob die AutoID im aktuellen Modell vorhanden ist
-            if any(d.get('AutoID') == auto_id for d in details):
-                # Extrahieren der RFID, wenn die AutoID gefunden wird
-                rfid = next((d.get('RFID') for d in details if 'RFID' in d), None)
-                rfid_element = f"[]{rfid}\n[]ANT2..." if rfid else None
-                return rfid_element
-    return None
-
-
 def get_car_name(auto_id):
     # JSON-Datei einlesen
     data = get_cars_json()
@@ -82,7 +55,7 @@ def save_car_data(data):
             json.dump(data, file, indent=4)
             return True
     except IOError as e:
-        print(f'Failed to write to cars_confing.json: {e}')
+        logger.warning(f'Failed to write to cars_confing.json')
     return False
 
 
@@ -108,6 +81,7 @@ def update_car_data(auto_id_list):
                 # Neues Auto hinzufügen
                 data[key_name] = [{"RFID": None}, {"AutoID": auto_id}]
                 data_changed = True
+                logger.info(f'Car {auto_id} added to cars_confing')
 
     if data_changed:
         return save_car_data(data)
@@ -115,8 +89,8 @@ def update_car_data(auto_id_list):
 
 def set_car_rfid(auto_id, new_rfid):
     model_name = get_car_name(auto_id)
-    if model_name == "-1":
-        print(f'AutoID "{auto_id}" not found in the data.')
+    if not model_name:
+        logger.warning(f"AutoID {auto_id} not found in cars_confing. Couldn\'t set the new rfid!")
         return False
 
     data = get_cars_json()
@@ -128,21 +102,18 @@ def set_car_rfid(auto_id, new_rfid):
     return False
 
 
-# Inspection Plan -----------
+# Simulation
+def get_rfid_forSimulation(auto_id):
+    # JSON-Datei einlesen
+    data = get_cars_json()
+    if data:
+        # Durchsuchen aller Einträge im Dictionary
+        for model, details in data.items():
+            # Überprüfen, ob die AutoID im aktuellen Modell vorhanden ist
+            if any(d.get('AutoID') == auto_id for d in details):
+                # Extrahieren der RFID, wenn die AutoID gefunden wird
+                rfid = next((d.get('RFID') for d in details if 'RFID' in d), None)
+                rfid_element = f"[]{rfid}\n[]ANT2..." if rfid else None
+                return rfid_element
+    return None
 
-def get_camera_response_key(inspection_plan_key):
-    """
-    get camera response key from inspection_plan key
-    :param inspection_plan_key:
-    :return:
-    """
-    try:
-        with open(inspection_plan_response_config_path, 'r') as file:
-            data = json.load(file)
-    except FileNotFoundError:
-        print("Datei nicht gefunden.")
-        data = {}
-    except json.JSONDecodeError:
-        print("Fehler beim Parsen der JSON-Daten.")
-        data = {}
-    return data.get(inspection_plan_key, None)

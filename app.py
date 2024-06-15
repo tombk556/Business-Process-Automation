@@ -1,25 +1,13 @@
 import json
-import threading
-
 from flask import Flask, render_template, redirect, url_for, request, jsonify, abort
 from InspectionHandler import InspectionHandler
 from src.utils.AASManager import AASManager
-from src.utils.util_functions import get_car_name, get_cars_json, update_car_data, set_car_rfid
+from src.utils.util_config_cars import get_car_name, get_cars_json, update_car_data, set_car_rfid
 
 app = Flask(__name__)
 
 
-@app.route('/switch_settings/', methods=['POST'])
-def handle_switch():
-    global handler
-    is_simulation = request.form.get('is_simulation') == 'true'
-    print(f"is_simulation: {is_simulation}")
-    if handler.is_connected:
-        stop_inspection()
-    handler = InspectionHandler(is_simulation=is_simulation)
-    return redirect(url_for('index'))
-
-
+# main control center of the app
 @app.route('/', methods=['GET', 'POST'])
 def index():
     context = {}
@@ -28,8 +16,8 @@ def index():
         auto_id = request.form['autoId'] if 'autoId' in request.form else None
         if rfid is not None and auto_id is not None:
             set_car_rfid(auto_id, rfid)
-    if ass_manager.test_connection_successful:
-        auto_id_list = ass_manager.get_all_idShorts()
+    if aas_manager.test_connection_successful:
+        auto_id_list = aas_manager.get_all_idShorts()
         update_car_data(auto_id_list)
     data = get_cars_json()
     context["vehicles"] = data
@@ -38,12 +26,30 @@ def index():
     inspection_handler_status = "active" if handler.is_connected else "inactive"
     inspection_handler_status = "not connected" if not handler.test_connection_successful else inspection_handler_status
     context["inspection_handler_status"] = inspection_handler_status
-    context["ass_connection"] = ass_manager.test_connection_successful
+    context["aas_connection"] = aas_manager.test_connection_successful
     return render_template("index.html", **context)
 
 
-@app.route('/connect_inspection/')
-def connect_inspection():
+# Switching between simulation and the actual opc ua server
+@app.route('/switch_settings/', methods=['POST'])
+def handle_switch():
+    global handler
+    is_simulation = request.form.get('is_simulation') == 'true'
+    if handler.is_connected:
+        stop_inspection()
+    handler = InspectionHandler(is_simulation=is_simulation)
+    return redirect(url_for('index'))
+
+
+# Check ----------------------------------------------------------------------------------------------------------------
+@app.route('/check_aas_connection/')
+def check_aas_connection_status():
+    aas_manager.test_connection()
+    return 'successful' if aas_manager.test_connection_successful else 'unavailable'
+
+
+@app.route('/check_connection/')
+def check_connection():
     handler.test_connection()
     if handler.test_connection_successful:
         return 'connection test successful'
@@ -51,6 +57,7 @@ def connect_inspection():
         return "connection test failed"
 
 
+# Start-Stop Inspection ------------------------------------------------------------------------------------------------
 @app.route('/start_inspection/')
 def start_inspection():
     global handler
@@ -69,21 +76,22 @@ def stop_inspection():
         return "already inactive"
 
 
+# Inspection Plan and Response -----------------------------------------------------------------------------------------
 @app.route('/inspection_plan/<auto_id>/')
 def inspection_plan(auto_id):
     context = {}
     car_name = get_car_name(auto_id)
-    if ass_manager.test_connection_successful:
-        data = ass_manager.get_inspection_plan(auto_id)
+    if aas_manager.test_connection_successful:
+        data = aas_manager.get_inspection_plan(auto_id)
         if data:
-            print(json.dumps(data, indent=4))
-            context["data"] = data['Inspection_Plan'] if 'Inspection_Plan' in data else None
+            context["data"] = data['Inspection_Plan'] if 'Inspection_Plan' in data else print(
+                json.dumps(data, indent=4))
         else:
             context["warning"] = "No Inspection Plan was found!\n Check the AAS connection!"
-            ass_manager.test_connection()
+            aas_manager.test_connection()
     else:
-        ass_manager.test_connection()
-        if ass_manager.test_connection_successful:
+        aas_manager.test_connection()
+        if aas_manager.test_connection_successful:
             context["warning"] = "Please reload this site!"
         else:
             context["warning"] = "Couldn't connect to AAS!"
@@ -96,17 +104,16 @@ def inspection_plan(auto_id):
 def inspection_response(auto_id):
     context = {}
     car_name = get_car_name(auto_id)
-    if ass_manager.test_connection_successful:
-        data = ass_manager.get_inspection_response(auto_id)
+    if aas_manager.test_connection_successful:
+        data = aas_manager.get_inspection_response(auto_id)
         if data:
-            print(json.dumps(data, indent=4))
-            context["data"] = data['Response_Plan'] if 'Response_Plan' in data else None
+            context["data"] = data['Response_Plan'] if 'Response_Plan' in data else print(json.dumps(data, indent=4))
         else:
             context["warning"] = "No Inspection Response was found!\n Check the AAS connection!"
-            ass_manager.test_connection()
+            aas_manager.test_connection()
     else:
-        ass_manager.test_connection()
-        if ass_manager.test_connection_successful:
+        aas_manager.test_connection()
+        if aas_manager.test_connection_successful:
             context["warning"] = "Please reload this site!"
         else:
             context["warning"] = "Couldn't connect to AAS!"
@@ -115,12 +122,7 @@ def inspection_response(auto_id):
     return render_template('inspection_response.html', **context)
 
 
-@app.route('/check_aas_connection/')
-def check_aas_connection_status():
-    ass_manager.test_connection()
-    return 'successful' if ass_manager.test_connection_successful else 'unavailable'
-
-
+# Logs -----------------------------------------------------------------------------------------------------------------
 @app.route('/view_logs/')
 def view_logs():
     return render_template("view_logs.html")
@@ -141,16 +143,16 @@ def reset_logs():
     try:
         with open("app.log", "r") as file:
             lines = file.readlines()
-
         last_lines = lines[-2:] if len(lines) >= 2 else lines
         with open("app.log", "w") as file:
             file.writelines(last_lines)
     except Exception as e:
-        print(f"Failed to truncate main log file!")
+        print(f"Failed to reset the log file!")
     return redirect(url_for('view_logs'))
 
 
+# main -----------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
-    ass_manager = AASManager(logger_on=False)
+    aas_manager = AASManager(logger_on=False)
     handler = InspectionHandler(is_simulation=True)
     app.run(debug=False)

@@ -1,14 +1,71 @@
+import json
+import os
+from config.env_config import settings
+
+inspection_plan_response_config_path = os.path.join(settings.main_path, 'inspection_plan_response_config.json')
+
+
+def create_response_plan(inspection_plan, inspection_response_simplified):
+    inspection_plan_part = inspection_plan['Inspection_Plan']
+    response_plan = {
+        "Response_Plan": {}
+    }
+    response_plan_part = response_plan["Response_Plan"]
+    # Durchgehen des 'Inspection_Plan'-Teils
+    for class_name, details in inspection_plan_part.items():
+        response_plan_part[class_name] = {}
+        camera_key = _get_camera_response_key(class_name)
+
+        for sub_category, value in details.items():
+            if "in_place" in sub_category:
+                sub = "in_place"
+            elif "free_of_damage" in sub_category:
+                sub = "free_of_damage"
+            elif "has_correct_color" in sub_category:  # wird None sein, da CameraResponse die Daten nicht liefert!
+                sub = "has_correct_color"
+            else:
+                sub = sub_category
+
+            new_val = _get_value(inspection_response_simplified, camera_key, sub)
+            if new_val is True:
+                response_plan_part[class_name][sub_category] = new_val
+            elif new_val is False:
+                response_plan_part[class_name][sub_category] = new_val
+            else:
+                if None in value:
+                    response_plan_part[class_name][sub_category] = None
+                else:
+                    response_plan_part[class_name][sub_category] = False
+    return response_plan
+
+
 def get_simplified_inspection_response(data_in, schwellwert=0.6):
     detections = _transform_detections(data_in)
     return _get_simplified_inspection_response(detections, schwellwert)
 
 
-def get_value(simplified_data_in, key, sub):
+def _get_camera_response_key(inspection_plan_key):
+    """
+    get camera response key from inspection_plan key
+    :param inspection_plan_key:
+    :return:
+    """
+    try:
+        with open(inspection_plan_response_config_path, 'r') as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        print("Datei nicht gefunden.")
+        data = {}
+    except json.JSONDecodeError:
+        print("Fehler beim Parsen der JSON-Daten.")
+        data = {}
+    return data.get(inspection_plan_key, None)
+
+
+def _get_value(simplified_data_in, key, sub):
     if key in simplified_data_in:
         return simplified_data_in[key][sub]
     else:
-        # Rückgabe einer Nachricht, wenn der Schlüssel nicht gefunden wird
-        # logger TODO
         return None
 
 
