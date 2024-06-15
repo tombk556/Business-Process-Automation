@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 import re
 import socket
 import threading
@@ -78,6 +79,10 @@ class OPC_UA_Subscriber:
         self.sub = None
         self.handler = self.SubHandler(self)
 
+        parsed_url = urlparse(self.opcua_url)
+        self.hostname = parsed_url.hostname
+        self.port = parsed_url.port
+
     class SubHandler:
         def __init__(self, outer):
             self.outer = outer
@@ -115,19 +120,26 @@ class OPC_UA_Subscriber:
         def register_callback(self, callback):
             self.callback = callback
 
-    def test_connection(self):
+    def test_connection(self, timeout=4):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)  # Timeout für die Verbindung einstellen
         try:
-            self.client.connect()
-            self.client.disconnect()
-            self.test_connection_successful = True
+            result = sock.connect_ex((self.hostname, self.port))
+            if result == 0:
+                self.test_connection_successful = True
+                return True  # Der Port ist offen und erreichbar
+            else:
+                logger.error(f"Lost connection to OPC UA Server!")
+                self.test_connection_successful = False
+                return False  # Der Port ist geschlossen oder nicht erreichbar
         except socket.error as e:
             self.test_connection_successful = False
-            logger.error(f"Network socket error on OPC UA connection!")
-        except Exception as e:
-            self.test_connection_successful = False
             logger.exception(f"Unhandled exception occurred while connecting to OPC UA server!")
+            return False
+        finally:
+            sock.close()
 
-    def connect(self, test=False):
+    def connect(self):
         self.test_connection()
         if self.test_connection_successful:
             if not self.is_connected:
@@ -146,9 +158,11 @@ class OPC_UA_Subscriber:
                 except Exception as e:
                     self.is_connected = False
                     logger.exception(f"Unhandled exception occurred while connecting to OPC UA server!")
+            else:
+                print("already connected")
 
     def disconnect(self):
-        if self.client:
+        self.is_connected = False
+        if self.client and self.test_connection_successful:
             self.client.disconnect()
-            self.is_connected = False
             logger.info("Disconnected from OPC UA Server")

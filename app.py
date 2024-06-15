@@ -23,6 +23,8 @@ def index():
     context["vehicles"] = data
     context["handler_connected"] = handler.is_connected
     context["is_simulation"] = handler.is_simulation
+    if handler.is_connected and not handler.opcua_subscriber.test_connection_successful:
+        handler.stop()
     inspection_handler_status = "active" if handler.is_connected else "inactive"
     inspection_handler_status = "not connected" if not handler.test_connection_successful else inspection_handler_status
     context["inspection_handler_status"] = inspection_handler_status

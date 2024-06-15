@@ -96,15 +96,25 @@ class InspectionHandler:
         try:
             while not self.stop_event.is_set():
                 time.sleep(1)
+                self.opcua_subscriber.test_connection()
+                if not self.opcua_subscriber.test_connection_successful:
+                    self.stop_event.set()
+                    self.test_connection_successful = False
         except Exception:
             logger.error("Error occurred while running the Application")
 
     def start(self):
         self.connect()
+        self.stop_event.clear()
         try:
+            self.runner_thread = None
             self.runner_thread = threading.Thread(target=self.run_loop)
             self.runner_thread.start()
-            return "active"
+            time.sleep(2)
+            if not self.runner_thread.is_alive():
+                return f"failed to start"
+            else:
+                return "active"
         except Exception as e:
             self.disconnect()
             self.stop_event.set()
@@ -112,10 +122,13 @@ class InspectionHandler:
             return f"failed"
 
     def stop(self):
-        self.stop_event.set()
-        if self.runner_thread and self.runner_thread.is_alive():
-            self.runner_thread.join()
-        self.disconnect()
+        if self.is_connected:
+            self.stop_event.set()
+            time.sleep(2)
+            if self.runner_thread.is_alive():
+                self.runner_thread.join()
+            self.disconnect()
+            self.is_connected = False
         return "inactive"
 
 
