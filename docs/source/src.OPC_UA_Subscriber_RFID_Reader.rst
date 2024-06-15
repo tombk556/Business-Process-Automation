@@ -1,7 +1,7 @@
-src.OPC\_UA\_Subscriber\_AssemplyLine module
+src.OPC\_UA\_Subscriber\_RFID\_Reader module
 ============================================
 
-.. automodule:: src.OPC_UA_Subscriber_AssemplyLine
+.. automodule:: src.OPC_UA_Subscriber_RFID_Reader
    :members:
    :undoc-members:
    :show-inheritance:

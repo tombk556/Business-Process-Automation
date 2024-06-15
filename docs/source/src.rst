@@ -21,4 +21,4 @@ Submodules
    :maxdepth: 4
 
    src.MQTT_Camera
-   src.OPC_UA_Subscriber_AssemplyLine
+   src.OPC_UA_Subscriber_RFID_Reader
