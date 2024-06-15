@@ -1,6 +1,5 @@
 import json
 import threading
-import time
 
 from flask import Flask, render_template, redirect, url_for, request, jsonify, abort
 from InspectionHandler import InspectionHandler
@@ -8,21 +7,11 @@ from src.utils.AASManager import AASManager
 from src.utils.util_functions import get_car_name, get_cars_json, update_car_data, set_car_rfid
 
 app = Flask(__name__)
-stop_event = threading.Event()
-
-
-def run_handler():
-    handler.connect()
-    try:
-        while not stop_event.is_set():
-            time.sleep(1)
-    except Exception:
-        print("Exception occurred")
 
 
 @app.route('/switch_settings/', methods=['POST'])
 def handle_switch():
-    global handler, handler_thread
+    global handler
     is_simulation = request.form.get('is_simulation') == 'true'
     print(f"is_simulation: {is_simulation}")
     if handler.is_connected:
@@ -64,29 +53,18 @@ def connect_inspection():
 
 @app.route('/start_inspection/')
 def start_inspection():
-    global handler_thread
+    global handler
     if not handler.is_connected:
-        try:
-            handler_thread = threading.Thread(target=run_handler)
-            handler_thread.start()
-            time.sleep(1)
-        except Exception as e:
-            stop_event.set()
-            return f"failed"
-        finally:
-            return "active"
-    return "already active"
+        return handler.start()
+    else:
+        return 'already active'
 
 
 @app.route('/stop_inspection/')
 def stop_inspection():
-    global handler_thread
+    global handler
     if handler.is_connected:
-        stop_event.set()
-        handler_thread.join()  # Wait for the thread to finish
-        handler.disconnect()
-        time.sleep(1)
-        return "inactive"
+        return handler.stop()
     else:
         return "already inactive"
 
@@ -175,5 +153,4 @@ def reset_logs():
 if __name__ == '__main__':
     ass_manager = AASManager(logger_on=False)
     handler = InspectionHandler(is_simulation=True)
-    handler_thread = None
     app.run(debug=False)

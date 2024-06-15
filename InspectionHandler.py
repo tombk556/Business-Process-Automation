@@ -98,23 +98,26 @@ class InspectionHandler:
             while not self.stop_event.is_set():
                 time.sleep(1)
         except Exception:
-            logger.error("Error occurred while starting to run the OPC UA subscriber")
+            logger.error("Error occurred while running the Application")
 
     def start(self):
         self.connect()
         try:
             self.runner_thread = threading.Thread(target=self.run_loop)
             self.runner_thread.start()
+            return "active"
         except Exception as e:
             self.disconnect()
             self.stop_event.set()
             logger.error("Error occurred while starting to run the OPC UA subscriber thread")
+            return f"failed"
 
     def stop(self):
         self.stop_event.set()
         if self.runner_thread and self.runner_thread.is_alive():
             self.runner_thread.join()
         self.disconnect()
+        return "inactive"
 
 
 if __name__ == "__main__":
