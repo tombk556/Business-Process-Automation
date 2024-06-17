@@ -184,4 +184,4 @@ def reset_logs():
 if __name__ == '__main__':
     aas_manager = AASManager(logger_on=False)
     handler = InspectionHandler(is_simulation=True)
-    app.run(debug=False, port=3000)
+    app.run(debug=False, port=3000, host="0.0.0.0")

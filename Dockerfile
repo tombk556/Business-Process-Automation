@@ -13,6 +13,4 @@ COPY InspectionHandler.py /app/
 COPY config/ /app/config/
 COPY .env /app/
 
-EXPOSE 3000
-
-CMD [ "python", "app.py"]
+EXPOSE 4000
