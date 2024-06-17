@@ -16,45 +16,52 @@ logger = SingletonLogger()
 
 class MQTTClient:
     """
-    MQTTClient Class
+    Manages communication with an MQTT broker, specifically for handling connection, messaging,
+    and response processing related to camera inspection requests and results.
 
-    The `MQTTClient` class manages communication with an MQTT broker, handling connection, messaging, and response processing for camera inspection requests and responses.
+    This class facilitates the publishing of inspection requests and the handling of asynchronous
+    responses from an MQTT broker, employing events to manage the synchronous aspects of asynchronous 
+    communications.
 
     Attributes:
-        client (mqtt.Client): Instance of the MQTT client.
+        client (mqtt.Client): Instance of the MQTT client using MQTT v5.0 protocol.
         broker_address (str): Address of the MQTT broker.
-        port (int): Port number for the MQTT broker.
-        request_topic (str): MQTT topic for sending inspection requests.
-        response_topic (str): MQTT topic for receiving inspection responses.
-        response_payload (dict): Stores the received response payload.
-        is_connected (bool): Indicates if the client is connected to the broker.
-        connection_established (threading.Event): Event to signal connection establishment.
-        message_received (threading.Event): Event to signal message reception.
+        port (int): Port number to connect to the MQTT broker.
+        request_topic (str): MQTT topic for publishing inspection requests.
+        response_topic (str): MQTT topic for subscribing to receive inspection responses.
+        response_payload (dict): Stores the latest received response payload.
+        is_connected (bool): True if the client is successfully connected to the broker.
+        connection_established (threading.Event): An event to signal successful connection establishment.
+        message_received (threading.Event): An event to signal the receipt of a new message.
 
     Methods:
-        __init__(self, broker_address_in=broker_address, port_in=port):
-            Initializes the MQTTClient with broker address and port.
+        __init__(self, broker_address_in, port_in):
+            Initializes the MQTTClient with specified broker address and port. Defaults are provided
+            through module-level configuration.
 
         on_connect(self, client, userdata, flags, reason_code, properties=None):
-            Callback for MQTT connection event, subscribing to the response topic and setting connection flags.
+            Handles successful connection events, subscribes to the response topic, and signals readiness.
 
-        on_disconnect(self, client, userdata, flags, reason_code, properties):
-            Callback for MQTT disconnection event, updating connection flags.
+        on_disconnect(self, client, userdata, reason_code, properties):
+            Handles the disconnection event, resets connection flags, and logs the event.
 
-        on_message(self, client, userdata, msg: MQTTMessage):
-            Callback for message reception, decoding JSON payload and setting message received flag.
+        on_message(self, client, userdata, msg):
+            Processes received messages, decodes JSON payloads, and logs the data.
+
+        test_connection(self):
+            Attempts to connect to the MQTT broker to check the connection status.
 
         connect(self):
-            Connects the MQTT client to the broker and waits for the connection to be established.
+            Establishes a connection with the MQTT broker and begins the network loop.
 
-        send_request(self, message="Triggering Camera"):
-            Publishes a message to the request topic to trigger the camera.
+        send_request(self, message):
+            Publishes a request message to the specified request topic.
 
-        request_response_cv(self, message="Triggering Camera", timeout=10):
-            Sends a request and waits for a response within the specified timeout period.
+        request_response_cv(self, message, timeout):
+            Sends a request for camera inspection and waits for a response within the specified timeout.
 
         disconnect(self):
-            Disconnects the MQTT client from the broker and stops the loop.
+            Stops the network loop and disconnects from the MQTT broker.
 
     Usage:
         mqtt_client = MQTTClient()
@@ -62,6 +69,8 @@ class MQTTClient:
         response = mqtt_client.request_response_cv()
         mqtt_client.disconnect()
     """
+
+
 
     def __init__(self, broker_address_in=broker_address, port_in=port):
         self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)

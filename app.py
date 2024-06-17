@@ -7,9 +7,12 @@ from src.utils.util_config_cars import get_car_name, get_cars_json, update_car_d
 app = Flask(__name__)
 
 
-# main control center of the app
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    """
+    Serves the main page of the application, handles POST to update RFID settings,
+    and dynamically updates car data from the AAS.
+    """
     context = {}
     if request.method == 'POST':
         rfid = request.form['RFID'] if 'RFID' in request.form else None
@@ -32,9 +35,11 @@ def index():
     return render_template("index.html", **context)
 
 
-# Switching between simulation and the actual opc ua server
 @app.route('/switch_settings/', methods=['POST'])
 def handle_switch():
+    """
+    Handles the switch between simulation and actual OPC UA server settings.
+    """
     global handler
     is_simulation = request.form.get('is_simulation') == 'true'
     if handler.is_connected:
@@ -43,15 +48,20 @@ def handle_switch():
     return redirect(url_for('index'))
 
 
-# Check ----------------------------------------------------------------------------------------------------------------
 @app.route('/check_aas_connection/')
 def check_aas_connection_status():
+    """
+    Checks and returns the connection status of the Asset Administration Shell (AAS).
+    """
     aas_manager.test_connection()
     return 'successful' if aas_manager.test_connection_successful else 'unavailable'
 
 
 @app.route('/check_connection/')
 def check_connection():
+    """
+    Performs a connection test for the main inspection handler and returns the status.
+    """
     handler.test_connection()
     if handler.test_connection_successful:
         return 'connection test successful'
@@ -59,9 +69,11 @@ def check_connection():
         return "connection test failed"
 
 
-# Start-Stop Inspection ------------------------------------------------------------------------------------------------
 @app.route('/start_inspection/')
 def start_inspection():
+    """
+    Initiates the inspection process if not already active.
+    """
     global handler
     if not handler.is_connected:
         return handler.start()
@@ -71,6 +83,9 @@ def start_inspection():
 
 @app.route('/stop_inspection/')
 def stop_inspection():
+    """
+    Stops the ongoing inspection process if currently active.
+    """
     global handler
     if handler.is_connected:
         return handler.stop()
@@ -78,9 +93,11 @@ def stop_inspection():
         return "already inactive"
 
 
-# Inspection Plan and Response -----------------------------------------------------------------------------------------
 @app.route('/inspection_plan/<auto_id>/')
 def inspection_plan(auto_id):
+    """
+    Retrieves and displays the inspection plan for a specified auto ID.
+    """
     context = {}
     car_name = get_car_name(auto_id)
     if aas_manager.test_connection_successful:
@@ -104,6 +121,9 @@ def inspection_plan(auto_id):
 
 @app.route('/inspection_response/<auto_id>/')
 def inspection_response(auto_id):
+    """
+    Retrieves and displays the inspection response for a specified auto ID.
+    """
     context = {}
     car_name = get_car_name(auto_id)
     if aas_manager.test_connection_successful:
@@ -124,14 +144,19 @@ def inspection_response(auto_id):
     return render_template('inspection_response.html', **context)
 
 
-# Logs -----------------------------------------------------------------------------------------------------------------
 @app.route('/view_logs/')
 def view_logs():
+    """
+    Displays the logs page to view application logs.
+    """
     return render_template("view_logs.html")
 
 
 @app.route('/log-content/')
 def log_content():
+    """
+    Fetches and returns the content of the log file.
+    """
     try:
         with open("app.log", "r") as file:
             lines = file.readlines()
@@ -142,6 +167,9 @@ def log_content():
 
 @app.route('/reset_logs/')
 def reset_logs():
+    """
+    Resets the log file to only keep the last few entries.
+    """
     try:
         with open("app.log", "r") as file:
             lines = file.readlines()
@@ -153,7 +181,6 @@ def reset_logs():
     return redirect(url_for('view_logs'))
 
 
-# main -----------------------------------------------------------------------------------------------------------------
 if __name__ == '__main__':
     aas_manager = AASManager(logger_on=False)
     handler = InspectionHandler(is_simulation=True)

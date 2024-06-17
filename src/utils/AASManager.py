@@ -173,11 +173,11 @@ class AASManager:
             response = requests.get(self.AAS_Registry_URL)
             if response.status_code == 200:
                 data = response.json()
-                results = data.get('result', [])  # Access the 'result' key which is a list of assets
+                results = data.get('result', [])
 
                 for item in results:
                     if 'idShort' in item:
-                        idShort_list.append(item['idShort'])  # Add 'idShort' to the list if it exists in the dictionary
+                        idShort_list.append(item['idShort'])
 
         except requests.RequestException as e:
             print(f"Failed to retrieve data: {e}")
@@ -191,14 +191,13 @@ class AASManager:
         :param search_idShort: The 'idShort' value to search for.
         :return: The 'href' string if found, otherwise None.
         """
-        results = data.get('result', [])  # Access the 'result' key which is a list of assets
+        results = data.get('result', [])
         for item in results:
             if item.get('idShort') == search_idShort:
                 endpoints = item.get("endpoints")
                 if endpoints:
-                    # Return the 'href' from the first endpoint's protocolInformation if available
                     return endpoints[0].get("protocolInformation", {}).get("href")
-        return None  # Return None if the 'idShort' was not found or the 'href' is not available
+        return None 
 
     def _get_submodelIdentifier(self, aas_ip_port, idShort):
         """
@@ -242,17 +241,14 @@ class AASManager:
         url = f"http://{ip_address}/submodels/{submodelIdentifier}/submodel-elements/{idShortPath}/attachment?fileName={aas_file_name}"
         json_string = json.dumps(json_data, indent=4).encode('utf-8')
 
-        # Multipart/Form-Data Encoder mit dem Dateiinhalt (oder leeren JSON)
         multipart_data = MultipartEncoder(
             fields={
                 'file': (aas_file_name, json_string, 'application/json')
             }
         )
 
-        # Die PUT-Anfrage durchführen
         response = requests.put(url, data=multipart_data, headers={'Content-Type': multipart_data.content_type})
 
-        # Antwort prüfen
         if response.status_code == 200:
             logger.info(f"Inspection response successfully put into AAS Shell for {auto_id}")
         else:

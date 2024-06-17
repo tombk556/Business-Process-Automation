@@ -1,5 +1,5 @@
-.. BPA SS24 Code Dokumentation documentation master file, created by
-   sphinx-quickstart on Sat Jun  8 10:43:57 2024.
+.. Business Process Automation documentation master file, created by
+   sphinx-quickstart on Mon Jun 17 13:59:02 2024.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
@@ -23,8 +23,6 @@ Getting Started
    :maxdepth: 2
    :caption: Contents:
 
-   modules
-   InspectionHandler
 
 
 Indices and tables

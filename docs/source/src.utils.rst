@@ -14,6 +14,6 @@ Submodules
 
    src.utils.AASManager
    src.utils.Logger
-   src.utils.util_ass_response
-   src.utils.util_camera_inspection_response
-   src.utils.util_functions
+   src.utils.util_aas
+   src.utils.util_config_cars
+   src.utils.util_inspection_response

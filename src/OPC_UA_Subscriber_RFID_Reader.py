@@ -20,49 +20,35 @@ logger = SingletonLogger()
 
 class OPC_UA_Subscriber:
     """
-    OPC_UA_Subscriber Class
-
-    The `OPC_UA_Subscriber` class manages the connection to an OPC UA server, subscribes to data changes, and handles the processing of inspection plans based on RFID data.
+    A class to manage connections and data subscriptions to an OPC UA server, handling data changes
+    and executing callbacks based on the RFID readings from a designated node. This class can operate in
+    both simulation and production modes defined by its initialization parameter.
 
     Attributes:
-        is_simulation (bool): Indicates if the system is in simulation mode.
-        opcua_url (str): URL of the OPC UA server.
-        ass_manager (AASManager): Instance of the AASManager for handling asset administration shell operations.
-        latest_auto_id_lock (threading.Lock): Lock for synchronizing access to the latest_auto_id.
-        latest_auto_id (str): Stores the latest auto ID read from the OPC UA server.
-        client (Client): OPC UA client instance.
-        sub (Subscription): OPC UA subscription instance.
-        handler (SubHandler): Instance of the subscription handler.
+        is_simulation (bool): Determines if the subscriber will connect to a mock-up or real OPC UA server.
+        test_connection_successful (bool): Indicates if the last connection test to the server was successful.
+        is_connected (bool): True if the subscriber is currently connected to the server.
+        opcua_url (str): The URL to the OPC UA server, determined based on the mode of operation.
+        ass_manager (AASManager): An instance of the Asset Administration Shell Manager for handling data.
+        latest_auto_id_lock (threading.Lock): A lock for thread-safe operations on the latest_auto_id.
+        latest_auto_id (str): The last read auto ID from the OPC UA server.
+        client (Client): An OPC UA client connected to the server.
+        sub (Subscription): A subscription object for the OPC UA client.
+        handler (SubHandler): An inner class instance to handle data change notifications.
+        hostname (str): Hostname parsed from the OPC UA URL.
+        port (int): Port number parsed from the OPC UA URL.
 
     Methods:
-        __init__(self, is_simulation=True):
-            Initializes the OPC_UA_Subscriber with optional simulation mode.
+        __init__(is_simulation=True): Initializes the subscriber, sets up the URL, and connects to the server.
+        test_connection(timeout=4): Tests the connection to the OPC UA server with a specified timeout.
+        connect(): Establishes a connection with the OPC UA server and subscribes to node changes.
+        disconnect(): Disconnects from the OPC UA server and cleans up resources.
 
-        connect(self):
-            Connects to the OPC UA server, subscribes to the relevant data node, and handles connection errors.
-
-        run(self):
-            Runs the OPC UA subscriber in a loop, allowing it to continuously monitor for data changes.
-
-        disconnect(self):
-            Disconnects from the OPC UA server and cleans up resources.
-
-    Inner Class - SubHandler:
-        __init__(self, outer):
-            Initializes the SubHandler with a reference to the outer OPC_UA_Subscriber instance.
-
-        datachange_notification(self, node, val, data):
-            Callback for handling data changes on the subscribed node, extracting RFID data and processing inspection plans.
-
-        register_callback(self, callback):
-            Registers a callback function to handle inspection responses.
-
-    Usage:
-        subscriber = OPC_UA_Subscriber(is_simulation=True)
-        subscriber.connect()
-        subscriber.run()
-        subscriber.disconnect()
+    Inner Class:
+        SubHandler: Handles data change notifications from the OPC UA server, processes RFID data,
+        triggers callbacks, and logs responses based on the inspection plan retrieved using the latest auto ID.
     """
+
 
     def __init__(self, is_simulation=True):
         self.is_simulation = is_simulation
