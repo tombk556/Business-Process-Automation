@@ -79,18 +79,7 @@ python3 OPC_UA_SimServer.py
 
 ## Sphinx-Documentation
 
-```bash
-pip install sphinx 
-```
-Run the commands to generate the documentation:
+Please unpack the **html_code_doc.zip**
 
-```bash
-cd docs 
-
-sphinx-apidoc -o source/ ../src/ -f -e -M
-
-make html
-
-sphinx-build -b pdf source build/pdf
-```
+Double click and open the **index.html** on your Browser
 
