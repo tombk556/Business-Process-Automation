@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block doc_title %}BPA - Logs{% endblock doc_title %}
+{% block title %}Application Logs{% endblock title %}
+
+{% block navigation %}
+<a class="mdl-navigation__link" href="{{ url_for('reset_logs') }}">Reset Logs</a>
+    <a class="mdl-navigation__link" href="{{ url_for('index') }}">Home</a>
+{% endblock navigation %}
+
+{% block side_navigation %}
+    <a class="mdl-navigation__link" href="{{ url_for('index') }}">Home</a>
+{% endblock side_navigation %}
+
+{% block content %}
+    <div class="container">
+        <br>
+        <div id="log-container">Lade Log-Daten...</div>
+    </div>
+{% endblock content %}
+
+{% block styles %}
+  <style>
+        #log-container {
+            background-color: #f4f4f4;
+            padding: 20px;
+            border: 1px solid #ddd;
+            overflow-x: auto; /* Allows horizontal scrolling */
+            overflow-y: auto; /* Allows vertical scrolling */
+            height: 500px; /* Fixed height for the scrolling area */
+            max-width: 100%;
+            white-space: pre-wrap; /* Maintains whitespace formatting */
+            word-wrap: break-word; /* Prevents text overflow by breaking long words */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+{% endblock styles %}
+
+{% block scripts %}
+<script>
+    function fetchLogContent() {
+        $.ajax({
+            url: '/log-content/',
+            type: 'GET',
+            success: function(response) {
+                $('#log-container').html(response.log_content.join('<br>'));
+            },
+            error: function() {
+                $('#log-container').html("Fehler beim Laden der Log-Daten.");
+            }
+        });
+    }
+
+    // Initialer Aufruf, um die Log-Daten beim Laden der Seite zu holen
+    fetchLogContent();
+
+    // 10 Sekunden Intervall - 6 mal pro Minute
+    setInterval(fetchLogContent, 12000);
+</script>
+{% endblock scripts %}

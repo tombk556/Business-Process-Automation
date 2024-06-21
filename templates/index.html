@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock title %}
+
+{% block doc_title %}BPA - Home{% endblock doc_title %}
+
+
+{% block navigation %}
+<a class="mdl-navigation__link" href="{{ url_for('view_logs') }}">Logs</a>
+{% endblock navigation %}
+
+{% block side_navigation %}
+<a class="mdl-navigation__link" href="{{ url_for('view_logs') }}">Logs</a>
+{% endblock side_navigation %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col" style="padding-top: 20px;">
+            <h1>BPA - Remote Access Application</h1>
+            <p>This is the home page for your automated business process management solutions.</p>
+            <table class="mdl-data-table">
+                <thead>
+                    <tr>
+                        <th>Vehicle</th>
+                        <th>RFID</th>
+                        <th>Auto ID</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vehicle, details in vehicles.items() %}
+                    <tr>
+                        <td>{{ vehicle }}</td>
+                        <td>
+                            <input style="min-width: 200px;" type="text" id="rfid-{{ loop.index }}" placeholder="Enter RFID"
+                                value="{% if details[0].RFID is not none %}{{ details[0].RFID }}{% endif %}"
+                                onchange="handleSubmit('rfid-{{ loop.index }}', '{{ details[1].AutoID }}')">
+                        </td>
+                        <td>{{ details[1].AutoID }}</td>
+                        <td><a href="{{ url_for('inspection_plan', auto_id=details[1]['AutoID']) }}"
+                                class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Plan</a>
+                        </td>
+                        <td><a href="{{ url_for('inspection_response', auto_id=details[1]['AutoID']) }}"
+                                class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Response</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="mdl-grid">
+                <div style="padding-top:10px; min-width: 300px;">
+                    <!-- Container für den dynamisch erzeugten Button -->
+                    <div id="buttonContainer"></div>
+                    <!-- Platzhalter für die Server-Antwort -->
+                    <div id="responseText">
+                        &nbsp;Status: {{ inspection_handler_status }}
+                    </div>
+                </div>
+                <div style="padding-top:10px;">
+                    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="is_simulation_switch">
+                        {% if is_simulation == True %}
+                            <input type="checkbox" id="is_simulation_switch" class="mdl-switch__input" checked>
+                            <span class="mdl-switch__label">OPC UA Connection on Simulation Server</span>
+                        {% else %}
+                            <input type="checkbox" id="is_simulation_switch" class="mdl-switch__input">
+                            <span class="mdl-switch__label">OPC UA Connection not on Simulation Server</span>
+                        {% endif %}
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="col d-flex justify-content-end" style="padding-top: 10px;">
+             <span style="height: 40px; line-height: 40px; display: inline-block; padding-right: 10px;">AAS Connection Check</span>
+            <div style="padding-top: 5px;">
+                 {% if aas_connection %}
+                    <button id="aas_connection_status_button" style="border-radius: 50%; height: 30px; width: 30px; background-color: green; border: none; cursor: pointer;"></button>
+                {% else %}
+                    <button id="aas_connection_status_button" style="border-radius: 50%; height: 30px; width: 30px; background-color: red; border: none; cursor: pointer;"></button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block scripts %}
+    <script>
+        document.getElementById('is_simulation_switch').addEventListener('change', function() {
+            let form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/switch_settings/';  // geänderte URL
+
+            let input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'is_simulation';
+            input.value = this.checked;
+
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+        });
+
+        document.getElementById('aas_connection_status_button').addEventListener('click', function() {
+            let button = this; // Referenz auf den Button
+            //let currentState = button.style.backgroundColor === 'red' ? 'unavailable' : 'successful';
+
+            button.style.backgroundColor = 'gray';
+            button.disabled = true;
+
+            // Fügt den currentState als REST-Parameter in den Pfad ein
+            fetch('/check_aas_connection/', {
+                method: 'GET' // Verwende GET Methode
+            })
+            .then(response => response.text()) // Verarbeitet eine Textantwort vom Server
+            .then(text => {
+                if (text === 'successful') {
+                    button.style.backgroundColor = 'green';
+                    button.disabled = false;
+                } else {
+                    button.style.backgroundColor = 'red';
+                    button.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Fehler beim Anfordern:', error);
+            });
+        });
+
+
+        function handleSubmit(inputId, autoId) {
+            const inputElement = document.getElementById(inputId);
+            const rfidValue = inputElement.value;
+
+            // Create a form element
+            const formElement = document.createElement('form');
+            formElement.method = 'post';
+            formElement.action = window.location.href;
+
+            // Add hidden input elements
+            const rfidInput = document.createElement('input');
+            rfidInput.type = 'hidden';
+            rfidInput.name = 'RFID';
+            rfidInput.value = rfidValue;
+            formElement.appendChild(rfidInput);
+
+            const autoIdInput = document.createElement('input');
+            autoIdInput.type = 'hidden';
+            autoIdInput.name = 'autoId';
+            autoIdInput.value = autoId;
+            formElement.appendChild(autoIdInput);
+
+            // Add the form to the body and submit it
+            document.body.appendChild(formElement);
+            formElement.submit();
+        }
+
+
+        $(document).ready(function() {
+            var buttonHtml;
+            // Prüfen, ob die Inspektion läuft
+            if ('{{ inspection_handler_status }}' === 'active') {
+                buttonHtml = '<button id="inspection_Button" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored button-background">Stop Inspection</button>';
+            } else if ('{{ inspection_handler_status }}' === 'inactive') {
+                buttonHtml = '<button id="inspection_Button" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored button-background">Start Inspection</button>';
+            }else {
+                buttonHtml = '<button id="inspection_Button" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored button-background">Test Connection</button>';
+            }
+
+            // Einfügen des Buttons in den Container
+            $('#buttonContainer').html(buttonHtml);
+
+            // Klick-Ereignis für den Button einrichten
+            $('#inspection_Button').click(function() {
+                var currentText = $(this).text();
+                var urlPath;
+                if (currentText === 'Start Inspection') {
+                    urlPath = '/start_inspection/';
+                } else if (currentText === 'Stop Inspection') {
+                    urlPath = '/stop_inspection/';
+                } else {
+                    urlPath = '/check_connection/';
+                }
+                 $('#responseText').html('&nbsp;Status: ...');
+
+                $.ajax({
+                    url: urlPath,
+                    type: 'GET',
+                    success: function(response) {
+                        $('#responseText').html('&nbsp;Status: ' + response);
+                        console.log("Server Response:", response);
+                        // Button-Text nach der Anfrage aktualisieren
+                        let newText;
+                        if (response.includes("successful")) {
+                             newText = 'Start Inspection';
+                        } else if (response.includes("failed")) {
+                             newText = 'Test Connection';
+                        } else if (response.includes("inactive")) {
+                            newText = 'Start Inspection';
+                        } else if (response.includes("active")) {
+                            newText = 'Stop Inspection';
+                        } else {
+                            newText = 'Test Connection';
+                        }
+
+                        $('#inspection_Button').text(newText);
+                    },
+                    error: function() {
+                        $('#responseText').text('Fehler bei der Inspektionssteuerung.');
+                    }
+                });
+                // Fokus nach dem Klick entfernen
+                $(this).blur();
+            });
+        });
+    </script>
+{% endblock scripts %}
